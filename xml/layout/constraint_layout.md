@@ -1,0 +1,1 @@
+The constraint-based layout lets a developer build complex layouts **without having to nest view groups**, which can ***improve the performance of the app***. It is built into the layout editor, so that the constraining tools are accessible from the Design tab without having to edit the XML by hand.
