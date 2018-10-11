@@ -38,3 +38,4 @@
 * [Need to do](./need_to.do.md)
 * UX design (User Experience design)用户体验设计
   * [UX](./UX/UX.md)
+  * [Focusing on end use](./UX/make_app.md)
