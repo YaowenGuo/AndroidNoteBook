@@ -25,9 +25,11 @@
     * [Button](./xml/button.md)
 * widget
   * [GridView](./widget/gridview.md)
+  * [WebView](./widget/webview.md)
 
 * View
   * [PieChart](./view/pie_chart.md)
+  * [Touch Event:](./view/touch_event.md)
 
 * [Problem](./problem.md)
 * structure
