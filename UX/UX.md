@@ -45,7 +45,7 @@ Make it easy with google or payple checkout.
 
 etc. Imagine a cooke baying application with login and checkout out form. Here is how you really get started.
 
-1. Imagine there is a task that your user wants to complete, it's I'm hungry for cookies and wants to get some and eat the cookies, basically.
+1. Imagine there is a task that your user wants to complete, For example it's I'm hungry for cookies and wants to get some and eat the cookies, basically.
 2. So then you think about what steps does your user need to go through to complete this task. So this is an easy example cause we only have one task.
 3. So the steps would be:
     1. Sign in.

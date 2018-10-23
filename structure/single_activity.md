@@ -4,3 +4,4 @@
 2. Activity 的 Theme 需要增加额外的控制代码，而不是简单的 AndroidMinifest.xml 配置就可以了。虽然大多数页面的主题都是一样的。但是总会有奇怪的设计和需求：不要这个，要那个。通过 Activity 设置这些主题、状态栏、导航栏都更成熟的方便。
 3. 返回父页面的 (Up Button) 的返回按钮（Back Button）逻辑更繁琐和难以理清。靠销毁，发 Intent 的方式新建页面来控制这个跳转逻辑。繁琐而且降低了效率。使用 Activity 的话，AndroidMinifest.xml 的  `android:parentActivityName=".MainActivity"
 ` 就能很好的控制 `Up Button` 逻辑。
+4. xml 的 onClick 属性不能直接和 Activity 的响应方法进行关联。

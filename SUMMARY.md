@@ -5,13 +5,14 @@
 * [XML](xml.md)
   * [Introduction](./xml/introduction.md)
   * [Activity](./activity/activity.md)
+  * [Intent](./activity/intent.md)
   * [Fragment](./activity/fragment.md)
-  * [Intent](./intent.md)
   * [Click](./xml/click.md)
   * Drawable
     * [Wripper](./xml/drawable/wripper.md)
     * [Problem](./xml/drawable/problem.md)
     * [Level List](./xml/drawable/level-list.md)
+    * [BitMap](./xml/drawable/bitmap.md)
   * Layout
     * [Layout](./xml/layout/layout.md)
     * [LinerLayout](./xml/layout/linear_layout.md)
@@ -26,6 +27,7 @@
 * widget
   * [GridView](./widget/gridview.md)
   * [WebView](./widget/webview.md)
+  * [TextView](./widget/textview.md)
 
 * View
   * [PieChart](./view/pie_chart.md)
@@ -40,4 +42,6 @@
 * [Need to do](./need_to.do.md)
 * UX design (User Experience design)用户体验设计
   * [UX](./UX/UX.md)
-  * [Focusing on end use](./UX/make_app.md)
+  * [Focusing on end use](./UX/user_centric_design.md)
+* Material Design
+  * [Main Idea](./material_design/main_idea.md)

@@ -61,3 +61,62 @@ for(int i=0;i<sportsList.length;i++){
 ```
 sportsImageResources.recycle();
 ```
+
+
+## 获取指定语言目录下的字符串
+
+```
+
+public class LanguageUtil {
+    private static String mLanguage = "";
+    private static Resources mResources;
+
+    /**
+     * 获取当前字符串资源的内容
+     *
+     * @param id
+     * @return
+     */
+    public static String getStringById(int id) {
+        if (mResources == null) {
+            mLanguage = PandaApplication.getPreferenceUtils().getString(Const.Language.SETTING);
+            Context context = PandaApplication.getContext();
+            if (context != null) {
+                mResources = context.getResources();
+                if (mResources != null) {
+                    mResources = getResourcesByLocale(mResources, mLanguage);
+                }
+            }
+        }
+        if (mResources == null) {
+            return "";
+        }
+        String string;
+        if (mLanguage != null && !"".equals(mLanguage)) {
+            string = mResources.getString(id, mLanguage);
+        } else {
+            string = mResources.getString(id, "");
+        }
+        return string;
+    }
+
+    public static void changeResources() {
+        mLanguage = PandaApplication.getPreferenceUtils().getString(Const.Language.SETTING);
+        if (mResources != null && mLanguage != null) {
+            mResources = getResourcesByLocale(mResources, mLanguage);
+        }
+    }
+
+    private static Resources getResourcesByLocale(Resources res, String localeName) {
+        Configuration conf = new Configuration(res.getConfiguration());
+        conf.locale = new Locale(localeName);
+        return new Resources(res.getAssets(), res.getDisplayMetrics(), conf);
+    }
+
+    private void resetLocale(Resources res) {
+        Configuration conf = new Configuration(res.getConfiguration());
+//        conf.locale = mCurLocale;
+        new Resources(res.getAssets(), res.getDisplayMetrics(), conf);
+    }
+}
+```

@@ -1,4 +1,18 @@
-# Implicit Intent
+# Intent
+
+Content intents for notifications are similar to the intents you've used throughout this course. Content intents can be explicit intents to launch an activity, implicit intents to perform an action, or broadcast intents to notify the system of a system event or custom event.
+
+Content intents
+
+- explicit intents
+```
+Intent notificationIntent = new Intent(this, MainActivity.class);
+```
+- implicit intents
+- broadcast intents
+
+
+## Implicit Intent
 
 
 1. Get the string value of the EditText:
