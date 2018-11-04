@@ -40,7 +40,7 @@ Make it easy with google or payple checkout.
 
 ## UX Design
 
-1. Focus on UX first and big picture but not on UI detail. It also useful for develop.
+1. Focus on UX first at big picture but not on UI detail. It also useful for develop.
 2. Use wireframing or low res wireframing to ovoid focus on detail first.
 
 etc. Imagine a cooke baying application with login and checkout out form. Here is how you really get started.
