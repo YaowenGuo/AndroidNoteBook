@@ -22,6 +22,8 @@
   * Resources
     * [Color](./xml/res/color.md)
     * [String](./xml/res/string.md)
+    * [Theme](./xml/res/style.md)
+    * [Font](./xml/res/font.md)
   * widget
     * [Button](./xml/button.md)
 * widget
@@ -45,3 +47,5 @@
   * [Focusing on end use](./UX/user_centric_design.md)
 * Material Design
   * [Main Idea](./material_design/main_idea.md)
+* Project
+  * [Order](./project/order.md)
