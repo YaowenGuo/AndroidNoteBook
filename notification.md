@@ -21,6 +21,7 @@ mNotifyManager = (NotificationManager)
      }
 }
 ```
+
 - 分类是以字符串作为 id 标识的。
 ```
 private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
@@ -30,6 +31,7 @@ NotificationChannel notificationChannel = new NotificationChannel(PRIMARY_CHANNE
        "Mascot Notification", NotificationManager
        .IMPORTANCE_HIGH);
 ```
+
 - 分类可以设置各种通知效果
 
 ```
@@ -71,6 +73,7 @@ public void sendNotification(View view) {
     NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
     mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
 }
+
 ```
 
 Content intents for notifications are similar to the intents you've used throughout this course. Content intents can be explicit intents to launch an activity, implicit intents to perform an action, or broadcast intents to notify the system of a system event or custom event.
