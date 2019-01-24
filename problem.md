@@ -19,3 +19,19 @@ convertView = mInflater.inflate(R.layout.item_phonetic, null);
 
 1. 为什么 5.0 之后的版本不会出现这种问题？
 2. 为什么使用 inflate 实例的 View 能够正常传入 LayoutParam 的类型 ？
+
+
+## 升级版本一定遵循官方指南，将所有的都改了
+
+百度 TTS 的bug 太沉重了，每次升级版本，牵涉到的不只是表面看到的编译错误，还有许多运行时错误，会牵涉到其中。新的安卓版本可能对软件有不同要求，这些都需要跟着改
+
+```
+<uses-library
+      android:name="org.apache.http.legacy"
+      android:required="false" />
+```
+
+https://developers.google.com/maps/documentation/android-sdk/config#specify_requirement_for_apache_http_legacy_library
+
+
+## 印象大的问题，一定要定位准确，推理要有理有据，不能根据猜测。

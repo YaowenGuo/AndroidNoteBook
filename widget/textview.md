@@ -10,3 +10,9 @@ Material Design Typography
                    parent="TextAppearance.AppCompat.Display1"/>
 
 ```
+
+android TextView取消内置上下边距
+
+```
+android:includeFontPadding="false"
+```

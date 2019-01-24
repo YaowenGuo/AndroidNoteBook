@@ -2,6 +2,8 @@
 
 android中的水波纹效果是5.0以后即API Level 21以后出现的，因此minSdkVersion必须设置在21及以上才可以使用此效果。
 
+***elevation 属性只有在设置了背景色的时候才生效***
+
 ***组件一定是可点击的，即clickable="true"***
 
 ## 默认的

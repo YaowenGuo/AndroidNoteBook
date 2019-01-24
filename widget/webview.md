@@ -1,5 +1,19 @@
 # WebView 中点击看大图
 
+
+## Android 8.0 上不显示
+
+设置了字体后，会导致 WebView 不显示。是 AndroidManifest.xml 中添加字体，自动添加了一个配置，删除即可，不影响字体的使用。
+
+Try to remove the preloading of fonts by removing
+```
+<meta-data
+android:name="preloaded_fonts"
+android:resource="@array/preloaded_fonts" />
+```
+
+
+
 WebView 中除了链接跳转，其他的点击事件是无法获取到的。但是 Android 提供了一种 Js 和 native 调用的方法，可以在 WebView 中使用 js 调用本地方法并传递参数，或者向 WebView 中传递本地数据。
 
 ## 1. 创建一个类，使用注解来标识哪些函数映射到 js 方法。
@@ -114,3 +128,67 @@ public void onPageFinished(WebView view, String url) {
 **需要注意的是，要在 WebView 中执行的 js 代码是严格模式，每条语句的后面都要使用分号 “;” 结束，否则会无法正常调用**
 
 **js 的 Array 对应的是 java 的 Array 类型， ArrayList 没有测试对应的类型。**
+
+
+# WebView 拦截 A 标签跳转地址兼容老版本
+
+``` java
+webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    addImageClickListener(view);
+                    loading.setVisibility(View.GONE);
+                }
+
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        String url = request.getUrl().toString();
+                        if (url == null || mTopicListener == null) return true;
+                        mTopicListener.onLickClick(url);
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    //该方法在Build.VERSION_CODES.LOLLIPOP以前有效，从Build.VERSION_CODES.LOLLIPOP起，建议使用shouldOverrideUrlLoading(WebView, WebResourceRequest)} instead
+                    //返回false，意味着请求过程里，不管有多少次的跳转请求（即新的请求地址），均交给webView自己处理，这也是此方法的默认处理
+                    //返回true，说明你自己想根据url，做新的跳转，比如在判断url符合条件的情况下，我想让webView加载http://ask.csdn.net/questions/178242
+                    if (url == null) return true;
+                    if (url.contains("/name")){
+                        Activity activity = getActivity();
+                        if (activity != null) {
+                            startActivity(new Intent(activity, NameActivity.class));
+                        }
+
+                    } else {
+                        jumpToBrowser(url);
+                    }
+                    return true;
+                }
+
+                private void addImageClickListener(WebView webView) {
+                    webView.loadUrl("javascript:(function(){"
+                            + "    var images = document.getElementsByTagName(\"img\");"
+                            + "    for(var i=0;i < images.length; i++) {"
+                            + "        images[i].onclick = function() {"
+                            + "            imageListener.viewImage(this.src);" //通过js代码找到标签为img的代码块，设置点击的监听方法与本地的viewImage方法进行连接
+                            + "        };"
+                            + "    }"
+                            + "})()");
+
+                    webView.loadUrl("javascript:(function(){"
+                            + "    var images = document.getElementsByTagName(\"img\");"
+                            + "    var urlArray = [];"
+                            + "    for (var i = 0; i < images.length; i++) {"
+                            + "        urlArray[i] = images[i].getAttribute(\"src\");"
+                            + "    };"
+                            + "    imageListener.getImageUrlList(urlArray);"
+                            + "})()");
+                }
+
+
+            });
+```

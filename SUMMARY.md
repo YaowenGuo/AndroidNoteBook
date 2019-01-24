@@ -1,13 +1,16 @@
 # Summary
-933427
 
 * [Introduction](README.md)
-* [XML](xml.md)
-  * [Introduction](./xml/introduction.md)
+* Activity
   * [Activity](./activity/activity.md)
   * [Intent](./activity/intent.md)
   * [Fragment](./activity/fragment.md)
+* Background Task
+  * [Processes and threads](./background/processes_and_threads.md)
+  * [Communication (Broadcast Rxbus)](./background/communication.md)
+* [XML](xml.md)
   * [Click](./xml/click.md)
+  * [Introduction](./xml/introduction.md)
   * Drawable
     * [Wripper](./xml/drawable/wripper.md)
     * [Problem](./xml/drawable/problem.md)
@@ -30,14 +33,28 @@
   * [GridView](./widget/gridview.md)
   * [WebView](./widget/webview.md)
   * [TextView](./widget/textview.md)
+  * [CardView](./widget/CardView.md)
+  * [Button](./widget/Button.md)
+  * [Toolbar](./widget/Toolbar.md)
+  * [CollapsingToolbarLayout](./widget/CollapsingToolbarLayout.md)
+  * [Keyboard](./widget/keyboard.md)
+  * [ViewPager](./widget/viewpager.md)
+  * [RecycleView](./widget/recycleview.md)
 
 * View
   * [PieChart](./view/pie_chart.md)
   * [Touch Event:](./view/touch_event.md)
+  *
+* [HenCoder](https://hencoder.com) 笔记
+  * [Layout](./hencoder/layout.md)
+  * [触摸反馈](./hencoder/touch_event.md)
+* Network
+  * [Network states and type](./network/state_and_type.md)
 
 * [Problem](./problem.md)
 * structure
   * [Single Activity](./structure/single_activity.md)
+  * [API data structure](./structure/data_structure.md)
 
 * [Log](./log.md)
 * [Notification](./notification.md)
@@ -47,5 +64,10 @@
   * [Focusing on end use](./UX/user_centric_design.md)
 * Material Design
   * [Main Idea](./material_design/main_idea.md)
+  * [architecture](./material_design/architecture.md)
+* DataBinding
+  * [Start](./databinding/start.md)
 * Project
   * [Order](./project/order.md)
+* [Migrate to AndroidX](./migrate2androidx.md)
+* [5.0 以下版本适配](adaptation_below5.md)
