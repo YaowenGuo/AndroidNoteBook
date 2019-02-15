@@ -55,6 +55,8 @@
 * structure
   * [Single Activity](./structure/single_activity.md)
   * [API data structure](./structure/data_structure.md)
+  * [MVVM](structure/mvvm/README.md)
+    * [M - Model](structure/mvvm/model.md)
 
 * [Log](./log.md)
 * [Notification](./notification.md)

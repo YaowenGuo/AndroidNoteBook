@@ -82,11 +82,12 @@ The major difference with an Intent that's used for a notification is that the I
 
 
 ## 8.0 之前显示效果
+
 Priority is an integer value from PRIORITY_MIN (-2) to PRIORITY_MAX (2). Notifications with a higher priority are sorted above lower priority ones in the notification drawer. HIGH or MAX priority notifications are delivered as "heads up"（就是弹屏通知） notifications, which drop down on top of the user's active screen. It's not a good practice to set all your notifications to MAX priority, so use MAX sparingly.
 
 
 
-
+```
 final NotificationManager manager =(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
 Notification notify= null; // 需要注意build()是在API level16及之后增加的，在API11中可以使用getNotificatin()来代替
@@ -118,3 +119,4 @@ manager.notify(1, notify);
 //        };
 //        Timer timer = new Timer();
 //        timer.schedule( task , 2000);
+```
