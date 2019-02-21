@@ -57,6 +57,7 @@
   * [API data structure](./structure/data_structure.md)
   * [MVVM](structure/mvvm/README.md)
     * [M - Model](structure/mvvm/model.md)
+    * [JetPack - ViewMode](structure/mvvm/view_model.md)
 
 * [Log](./log.md)
 * [Notification](./notification.md)

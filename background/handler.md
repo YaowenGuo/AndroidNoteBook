@@ -50,7 +50,41 @@ System.out: Thread id: 1
 可以看到 Handler 的 post 并不是在子线程中执行的，而是 Handler 对象所在的线程中执行的。 而在 Hander 的文档中说明了 `Handler()
 Default constructor associates this handler with the Looper for the current thread.`。
 
-也可以指定线程执行 Hander 的 post 代码，就是在创建时指定 Looper。这时候就不能使用 Java 原生的 Thread 了，因为 Handler 要使用执行线程的 Looper.
+也可以指定线程执行 Hander 的 post 代码，就是在创建时指定 Looper。
+
+```Java
+public class TestActivity extends AppCompatActivity {
+    Handler handler;
+    Handler handler1;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_test);
+
+        System.out.println("Handler message main: " + Thread.currentThread().getId());
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Looper.prepare(); // 必须，因为 Handler 创建时会获取所在线程的 Thread 的 looper。
+                handler1 = new Handler();
+                handler1.post(new Runnable(){
+                    @Override
+                    public void run() {
+                        System.out.println("Handler message receive : " + Thread.currentThread().getId());
+
+                    }
+                });
+                Looper.loop(); // 必须执行，用于启动消息处理。
+            }
+        });
+        thread.start();
+    }
+}
+
+```
+
+或者使用 Android 已经封装好的 HandlerThread
 
 ```Java
 public class TestActivity extends AppCompatActivity {
@@ -229,5 +263,7 @@ Handler 进程间通信，其实就是典型的生产者消费者模型。发�
 ![Producer and Consumer](images/producer_and_consumer.png)
 ![Hander](images/handler_messagequne_looper.png)
 
+
 - 每个线程仅有一个 MessageQueue
-- 每个线程仅有一个 Looper, MessageQueue 对象是在Looper的构造函数中创建的，因此一个Looper也就对应了一个MessageQueue。
+- 每个线程仅有一个 Looper, MessageQueue 对象是在Looper的构造函数中创建的，因此一个Looper也就对应了一个MessageQueue。Loopler.looper方法，就是一个死循环，不断地从MessageQueue取消息，如果有消息就处理消息（调用 Message 对象绑定的 Handler的dispatchMessage 将消息还给 Handler 执行。执行顺序为，Handler 的 runnable，不存在就执行所在线程的 Runnable，不存在就执行 Handler 的 handleMessage() 方法。多个Handler 时，谁发的，就分发给谁，因为发送消息时保存了 Handler 的引用），没有消息就阻塞。
+- Handler封装了消息的发送，将消息发送给绑定的线程中的 MessageQueue(从 Looper 中获取)。
