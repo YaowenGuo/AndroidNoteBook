@@ -1,4 +1,4 @@
-# An卓的线程线程
+# 安卓的线程
 
 在 App 启动的时候，会创建一个主线程，也就是UI线程，在这个线程中分发用户的操作，到适当的组件。
 
@@ -12,21 +12,23 @@
 
 基于上面两个原因，想要处理一个耗时工作，在安卓中并不是一个简单的过程。但是安卓提供了一些方法，来帮助快速完成这些工作。
 
-***无论是 AsyncTask 和 SyncLoader 都没有包含在JetPack 中，或许 ViewModel 和 LifeCycle 是其替代者***
+
 
 Thread & Handler -> AsyncTask -> RxJava
 
 有几种方式用于后台任务
 
-java 原生进程 & [Handler](handler.md)：
+> java 原生进程/HandlerThread & [Handler](handler.md)：
+
 - 自己处理子线程和主线程消息传递，来进行 UI 操作
 - 代码分散，阅读性差
+- HandlerThread 是Java 原生Thread 封装了Handler. 适用于 API callback，从 API1 就有。
+- ThreadPool 执行许多并行任务 -> WorkManager
+- Future & Callable 也是 Java 原生的新类。? 待考证
 
-Future & Callable
 
-? 待考证
+> AsyncTask
 
-AsyncTask
 - 如果销毁了创建AsyncTask的 Activity(如旋转屏幕)，则AsyncTask不会随之被销毁。新创建的Activity 并不能方便的关联。
 - Activity 销毁时，AsyncTask 并不会自动销毁，容易引发内存泄漏。
 
@@ -34,25 +36,16 @@ AsyncTask
 - 不需要向UI或用户报告结果的任务。
 - 低优先级，可以可以放任不结束的任务。
 
-使用Loader，及子类AsyncTaskLoader。已经被（ViewModel + LiveData（数据库改变自动通知View）代替，不再记录）
+使用Loader，及子类AsyncTaskLoader。已经被（ViewModel + LiveData（数据观察者模式）代替，不再记录）
 
-LiveData
+***无论是 AsyncTask 已经不用于 View 更新，仅将执行的结果放到 LiveData 中，使用 LiveData 来更新 UI, 而ViewModel 用于缓存跟 UI 相关的所有数据。***
 
-LiveData 是安卓架构组件的一部分，相比于之前的异步，LiveData 新增加了许多特性：
-- 感知 UI 组件的生命周期
-- 自带观察者模式，能够在数据发生变化时自动通知 UI 在合适的时机更新。
-
-
-
-RxJava
+> RxJava
 
 - 流式调用
-
-
-- HandlerThread 适用于 API callback，恐怕是和Java 原生搭配使用的，从 API1 就有。
-- ThreadPool 执行许多并行任务 -> WorkManager
-
 - IntendService 理想的后台任务， 或在 UI 线程之外获取 Intent.
+
+
 
 ？ 加锁
 ？ LiveData 用法，能否和 Rxjava 结合使用？
