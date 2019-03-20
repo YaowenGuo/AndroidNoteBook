@@ -72,6 +72,7 @@
 * UX design (User Experience design)用户体验设计
   * [UX](./UX/UX.md)
   * [Focusing on end use](./UX/user_centric_design.md)
+  * [Reminder](UX/reminder.md)
 * Material Design
   * [Main Idea](./material_design/main_idea.md)
   * [architecture](./material_design/architecture.md)
