@@ -41,13 +41,13 @@
 
 个性化还包括通知的语言，时间等。
 
-- 除非你的通知非常紧急（例如聊天），否则不要在夜里和工作时间发送通知，根据陈德鲁的研究，最好在晚上6点到8点之间发送推送通知，这时参与度达到最高。别忘了，应该是用户的时区下午6-8点！
+- 除非你的通知非常紧急（例如聊天），否则不要在夜里和工作时间发送通知，根据陈德鲁的研究，最好在晚上6点到8点之间发送推送通知，这时参与度达到最高。别忘了，应该是用户的时区下午6-8点！在他们下班之后，看电视的休息时间。
 
 ![](images/notification_push_time.png)
 
-注：下午6点至8点仅作为经验法则。推送通知的时间安排还应考虑消息的紧急性。好的时机应该同时考虑用户行为和紧迫性。
+注：下午6点至8点仅作为经验法则。推送通知的时间安排还应考虑消息的紧急性。好的时机应该同时考虑用户行为和紧迫性。无论出于何种目的，不合时宜的通知对用户来说就是噪音。
 
-
+- 克服不合时宜的通知的第一步是让用户感受到控制权。给用户设置的机会让他们对收到的邮件的频率和内容发表意见，为通知做好准备。
 
 
 #### 保持通知清晰易懂
@@ -125,8 +125,9 @@
 
 任何通知都会打断用户：这是为了引起我们的注意，并将其引导到通知中。当我们能够从通知中得到的价值大于被中断的工作时，我们并不介意；但当信息与我们无关时，打扰是令人恼火的。有些人喜欢将收件箱保持在零条未读信息，另一些人则喜欢手机的锁屏上没有通知。如果您属于后一组，那么清除不相关的通知就显得特别耗时和麻烦。
 
-向用户发送应用程序中发生的每一件小事的通知都是一个很大的错误。你不想成为一个应用程序，让你的用户在任何时候屏幕上弹出一个通知时都会翻白眼。你也不应该通过说“好吧，他们可以在设置中关闭他们”来证明这种行为是正当的，相反，提供相关的内容来通知和参与。
+向用户发送应用程序中发生的每一件小事的通知都是一个很大的错误。你不想成为一个通过通知让用户而反感的应用程序。你也不应该抱着“好吧，他们可以在设置中关闭他们”的想法来证明这种行为是正当的，相反，提供相关的内容来通知和参与。
 
+- 例如，google 的文档中明确指出，不要发送节日祝贺的通知。一是用户比一定对你推动的节日内容关心（无关内容）；二是，即使用户对那个节日充满热情，那他肯定知道节日的相关内容。这样节日不会给用户带来任何价值，反而打断了用户。
 - 不要仅仅为了“吸引用户”而发送推送通知。例如，Facebook通常会发送通知，给用户推送随机推荐的人或“在Facebook上找到更多的朋友”。这是一个糟糕的尝试，诱使用户重新进入应用程序。
 
 ![Useless notification](images/notification_facebook_unlesss.png)
@@ -143,9 +144,20 @@
 无论原因是什么，您都不应该试图对用户隐藏此功能。这种做法具有欺骗性，会降低对公司和应用程序的信任，并为用户提供删除应用程序的更多理由。
 关闭应用程序通知应该简单快捷。允许用户在应用程序中编辑他们的通知首选项，这样他们就不会被强制转到手机的本地设置。此外，将此功能放在应用程序的“设置”部分，以满足用户的期望并确保可查找性。
 
+为了保证用户真正能控制通知的接收，有些 app 会在发送通知之前询问用户是否接收通知，这种做法最好是在用户使用一段时间 app 之后，在 APP 刚安装时，app还没有获得用户的信任，用户根本不知道通知将会带来什么。极大可能就关闭了通知接收。
+
+> 以上整理自以下文档
+
 [Five Mistakes in Designing Mobile Push Notifications](https://www.nngroup.com/articles/push-notification/)
 [Rules For Creating Perfect Push Notifications](https://www.uxbooth.com/articles/rules-for-creating-perfect-push-notifications/)
 [The Best Notification I’ve Ever Received](https://www.urbanairship.com/blog/the-best-notification-ive-ever-received)
+[Tips, advice and tools to create, run and grow your mobile apps. ](http://blog.inapptics.com/push-notification-best-practices/)
+[Notification Overload: Best Practices for Designing Notifications with Respect for Users](https://theblog.adobe.com/notification-overload-best-practices-for-designing-notifications-with-respect-for-users/)
+
+
+
+
+
 ## 前提条件
 
 - Android 的通知会先分配给App, App 再控制通知显示的样式：是否现在状态栏，是否在屏幕悬浮显示，图标，样式，只是灯等。

@@ -124,3 +124,17 @@ AsyncTask 是一个抽象类，它包含一个在子线程中执行的 `doInBa
 - 不需要向UI或用户报告的任务。
 - 可以保留未完成的低优先级任务。
 - 对于所有其他情况，请使用AsyncTaskLoader，它是下面描述的Loader框架的一部分。
+
+
+
+
+## 结构
+
+Thread and Runnable 的子类
+
+- HandlerThread: 和 Thread and Runnable 一样，用于执行一次性的任务
+- AsyncTask: 一次性的任务，具有进度和结束反馈的回调
+- IntentService: 执行多个任务，但同一时刻只有一个在执行。
+
+组件
+- ThreadPoolExecutor: 在资源可用时自动执行，或者多个线程同时执行，ThreadPoolExecutor 提供了一个线程池。将任务放入队列，任务会在有可用线程时自动执行。（保证要在多个线程内执行的代码是线程安全的。）
