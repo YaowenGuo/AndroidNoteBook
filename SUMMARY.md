@@ -5,7 +5,6 @@
   * [Animation](ui/animation/README.md)
 * Structure
 * Data
-*
 * Activity
   * [Activity](./activity/activity.md)
   * [Intent](./activity/intent.md)
@@ -24,6 +23,7 @@
     * [Problem](./xml/drawable/problem.md)
     * [Level List](./xml/drawable/level-list.md)
     * [BitMap](./xml/drawable/bitmap.md)
+    * [shape](xml/drawable/shape.md)
   * Layout
     * [Layout](./xml/layout/layout.md)
     * [LinerLayout](./xml/layout/linear_layout.md)
@@ -48,12 +48,19 @@
   * [Keyboard](./widget/keyboard.md)
   * [ViewPager](./widget/viewpager.md)
   * [RecycleView](./widget/recycleview.md)
+  * [SearchView](widget/searchview.md)
+  * [EditText](widget/edittext.md)
+  * [Dialog](widget/dialog.md)
+  * [TextSwitcher](widget/TextSwitcher.md)
+  * [Toast](widget/toast.md)
 
 * View
   * [PieChart](./view/pie_chart.md)
   * [Touch Event:](./view/touch_event.md)
   *
 * [HenCoder](https://hencoder.com) 笔记
+  * [Text](hencoder/drawtext.md)
+  * [Transformation](hencoder/transformation.md)
   * [Layout](./hencoder/layout.md)
   * [触摸反馈](./hencoder/touch_event.md)
 * Network

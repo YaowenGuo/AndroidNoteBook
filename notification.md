@@ -151,21 +151,50 @@
 > 以上整理自以下文档
 
 [Five Mistakes in Designing Mobile Push Notifications](https://www.nngroup.com/articles/push-notification/)
+
 [Rules For Creating Perfect Push Notifications](https://www.uxbooth.com/articles/rules-for-creating-perfect-push-notifications/)
+
 [The Best Notification I’ve Ever Received](https://www.urbanairship.com/blog/the-best-notification-ive-ever-received)
+
 [Tips, advice and tools to create, run and grow your mobile apps. ](http://blog.inapptics.com/push-notification-best-practices/)
+
 [Notification Overload: Best Practices for Designing Notifications with Respect for Users](https://theblog.adobe.com/notification-overload-best-practices-for-designing-notifications-with-respect-for-users/)
 
 
 
 
 
-## 前提条件
+## Android 系统提供的能力
 
-- Android 的通知会先分配给App, App 再控制通知显示的样式：是否现在状态栏，是否在屏幕悬浮显示，图标，样式，只是灯等。
-- Android8.0 (API26)开始，增加了分类（channel）功能，用户可以自定义分类来分别设置通知，以及将不同通知放到一个分类中，设置将对该组通知同时生效。
+看通知前先了解一下 Android 的一些概念，方便后面说明。状态栏图标，android 收到通知后，可以选择是否在状态栏显示通知标识
 
-- target API 必须是26或者更高，否则会显示的跟26之前版本一样。
+> 状态栏
+
+![Notification Status Bar](images/notification_area.png)
+
+> 通知抽屉栏
+
+下拉状态栏
+
+### 优先级
+
+Android 为通知定义了五个不同的优先级，但是 IMPORTANCE_NONE 和 IMPORTANCE_HIGH 看不出任何区别，所以实际上只有四个等级。
+
+| User-visible importance level	Importance    | (Android 8.0 and higher) | Priority (Android 7.1 and lower) |
+| :------------- | :------------- | :------------- |
+| Urgent Notifications make a sound and appear as heads-up notifications.      | IMPORTANCE_HIGH or  IMPORTANCE_NONE      |  PRIORITY_HIGH or PRIORITY_MAX |  
+| High Notifications make a sound. |	IMPORTANCE_DEFAULT (我的华为手机能够有显示在状态栏上，可能跟系统厂商的默认设置有关。)|	PRIORITY_DEFAULT |
+| Medium Notifications make no sound. |	IMPORTANCE_LOW | PRIORITY_LOW |
+| Low Notifications make no sound and do not appear in the status bar.	 | IMPORTANCE_MIN |	PRIORITY_MIN |
+
+
+Android 8.0 开始，需要为不同通知绑定一个分类。这个分类称为 channel, 用户能够在 setting 的 app -> permission 中看到改分类的名字，和描述。用于向用户解释该类通知的作用。分类一旦建立，就不能再更改其行为，由用户根据需要，调整设置该分类是否显示，是否有声音等通知属性。
+
+为了用户免收通知轰炸的打扰，8.0 开始，APP 通知每秒钟最多只能响铃一次。其他行为不受影响，通知也能够正常交付。**可见，响铃是一个非常重要的特性，务必谨慎使用，非紧急/实时通知（例如聊天），最好不要响铃**
+
+
+
+
 
 ## 申请
 

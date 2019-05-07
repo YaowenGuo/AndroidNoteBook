@@ -120,3 +120,56 @@ public class LanguageUtil {
     }
 }
 ```
+
+
+## 特殊字符
+
+```
+'&' --> '&amp;'
+
+'<' --> '&lt;'
+
+'>' --> '&gt;'
+
+<string name="magazine">Newspaper &amp; Magazines</string>
+```
+
+或者使用附加标签标识其中有特殊字符
+
+```XML
+<string name="guide_desc"><Data><![CDATA[More than <strong><font color=#234253>100,000</font></strong> users' choice]]></Data></string>
+
+```
+
+此时并不能直接用于布局文件，需要用 Html 类转换为 Spanned 对象。
+```Kotlin
+binding.desc.text = Html.fromHtml(getString(R.string.guide_desc))
+```
+
+## 字符串格式化
+
+安卓中将字符串作为资源来支持多语言，经常有一部分需要变化的，可以用替换的方式来处理，比如“我的名字叫李四，我来自首都北京”；这里的“李四”和“首都北京”都需要替换。
+
+```XML
+<string name="alert">我的名字叫%1$s，我来自%2$s</string>
+```
+```Java
+String sAgeFormatString sAgeFormat1= getResources().getString(R.string.alert);     
+String sFinal1 = String.format(sAgeFormat1, "李四","首都北京");
+```
+
+
+xliff:g标签介绍：
+
+属性值举例说明
+`%n$ms`：代表输出的是字符串，n代表是第几个参数，设置m的值可以在输出之前放置空格
+`%n$md`：代表输出的是整数，n代表是第几个参数，设置m的值可以在输出之前放置空格，也可以设为0m,在输出之前放置m个0
+`%n$mf`：代表输出的是浮点数，n代表是第几个参数，设置m的值可以控制小数位数，如m=2.2时，输出格式为00.00
+
+也可简单写成：
+
+%d   （表示整数）
+
+%f    （表示浮点数）
+
+%s   （表示字符串）

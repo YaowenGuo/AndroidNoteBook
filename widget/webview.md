@@ -192,3 +192,54 @@ webView.setWebViewClient(new WebViewClient() {
 
             });
 ```
+
+
+## Problem
+
+> 在首次安装时 App，WebView 会回调 `override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?)` 出现 error.code 为 -1， error.description 为 `net::ERR_CACHE_MISS` 的错误。并且数据也正常获取了，第二次启动就没有问题了。需要在 WebView 创建时设置
+
+
+```
+if (Build.VERSION.SDK_INT >= 19) {
+        mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+}
+```
+
+> 调试
+
+想要调试 WebView 需要对 WebView 进行设置 `        WebView.setWebContentsDebuggingEnabled(true)
+` 然后就可以进行调试了。
+
+
+调试手机 Web 页面
+https://developers.google.com/web/tools/chrome-devtools/remote-debugging/?utm_source=dcc&utm_medium=redirect&utm_campaign=2016q3
+
+调试 WebView
+
+https://github.com/riskers/blog/issues/11
+
+
+> 获取 User-Agent
+
+不要使用如下方法，因为如果已经创建了一个 WebView 时，将抛出错误。
+
+```
+String ua=new WebView(this).getSettings().getUserAgentString();
+```
+使用 WebSettings 的静态方法直接获取。
+
+```
+@TargetApi(17)
+static class NewApiWrapper {
+  static String getDefaultUserAgent(Context context) {
+    return WebSettings.getDefaultUserAgent(context);
+  }
+}
+```
+
+> 出错时加载内部网页
+
+```Java
+view?.loadUrl("file:///android_asset/web/error_page.html")
+
+```

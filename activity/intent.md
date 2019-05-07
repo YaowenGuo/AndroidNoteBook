@@ -100,3 +100,49 @@ ActivityNotFoundException
         e.printStackTrace();
     }
 ```
+以上处理并不太好，可以先检测是否存在。
+
+> 启动另一个 App
+
+```Java
+Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.package.address");
+if (launchIntent != null) {
+    startActivity(launchIntent);//null pointer check in case package name was not found
+}
+
+
+没有安装 app 则打开应用市场
+
+public void startNewActivity(Context context, String packageName) {
+    Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+    if (intent == null) {
+        // Bring user to the market or let them choose an app?
+        intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("market://details?id=" + packageName));
+    }
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    context.startActivity(intent);
+}
+```
+
+
+> 有闪屏页和主页时，点击图标会再次创建闪屏页的问题
+
+```Kotlin
+https://www.jianshu.com/p/b202690b7d96
+
+if ((intent.flags and Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) > 0) {
+            finish()
+            return
+        }
+```
+
+
+> 通知会从新创建页面
+
+下面代码会导致页面从新创建
+
+```
+resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+```

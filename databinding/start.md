@@ -99,3 +99,29 @@ binding?.recipeListRv?.adapter = RecipeRecycleAdapter()
 ### 绑定数据
 
 处理绑定组件，数据绑定，当然最关注的还是数据。
+
+
+### 运算符转换
+
+```
+'&' --> '&amp;'
+
+'<' --> '&lt;'
+
+'>' --> '&gt;'
+
+android:visibility="@{age &lt; 13 ? View.GONE : View.VISIBLE}"
+```
+
+HTML Character entities often used in Android:
+
+
+| Symbol | Equivalent HTML Entity      |  |  |  |
+| :----- | :-------------------------- |:-|:-|:-|
+| >      | `&gt;`                      |  |  |  |
+| <      | `&lt;`                      |  |  |  |
+| "      | `&quot;, &ldquo; or &rdquo;`|  |  |  |
+| '      | `&apos;, &lsquo; or &rsquo;`|  |  |  |
+| }      | `&#125;`                    |  |  |  |
+| &      | `&amp;`                     |  |  |  |
+| space  | `&#160;`                    |  |  |  |

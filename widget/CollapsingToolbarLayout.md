@@ -6,3 +6,6 @@ mAppBarLayout.setExpanded(true);
 自动折叠：
 
 mAppBarLayout.setExpanded(false);
+
+
+CoordinatorLayout
