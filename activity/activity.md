@@ -75,3 +75,14 @@ getSupportActionBar().setHomeButtonEnabled(true); //设置返回键可用
 <!-- 溢出菜单图标颜色，可以自己设置成任意的颜色-->
 <item name="colorControlNormal">@android:color/white</item>
 ```
+
+
+#### 使用 context 启动 app crash
+
+Calling startActivity() from outside of an Activity context
+
+add - FLAG_ACTIVITY_NEW_TASK flag to your intent:
+
+```
+myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+```

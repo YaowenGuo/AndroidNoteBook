@@ -3,12 +3,14 @@
 * [Introduction](README.md)
 * UI
   * [Animation](ui/animation/README.md)
+    * [Property Animation](ui/animation/property_animation.md)
 * Structure
 * Data
 * Activity
   * [Activity](./activity/activity.md)
   * [Intent](./activity/intent.md)
   * [Fragment](./activity/fragment.md)
+* [Manifests](manitests/README.md)
 * Background Task
   * [Processes and threads](./background/processes_and_threads.md)
   * [Communication (Broadcast Rxbus)](./background/communication.md)
@@ -53,6 +55,7 @@
   * [Dialog](widget/dialog.md)
   * [TextSwitcher](widget/TextSwitcher.md)
   * [Toast](widget/toast.md)
+  * [悬浮窗](widget/float_window.md)
 
 * View
   * [PieChart](./view/pie_chart.md)
