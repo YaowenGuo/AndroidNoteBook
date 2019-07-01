@@ -68,6 +68,12 @@
   * [触摸反馈](./hencoder/touch_event.md)
 * Network
   * [Network states and type](./network/state_and_type.md)
+* Data
+  * Local
+    * SharePreference
+    * [File (I/O)](data/local/file/IO.md)
+    * SQLite
+  * Remote
 
 * [Problem](./problem.md)
 * structure
@@ -96,3 +102,6 @@
   * [FilePath](project/file_path.md)
 * [Migrate to AndroidX](./migrate2androidx.md)
 * [5.0 以下版本适配](adaptation_below5.md)
+* Kotlin
+  * [function](kotlin/function.md)
+

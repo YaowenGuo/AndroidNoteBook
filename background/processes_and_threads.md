@@ -138,3 +138,13 @@ Thread and Runnable 的子类
 
 组件
 - ThreadPoolExecutor: 在资源可用时自动执行，或者多个线程同时执行，ThreadPoolExecutor 提供了一个线程池。将任务放入队列，任务会在有可用线程时自动执行。（保证要在多个线程内执行的代码是线程安全的。）
+
+
+## 获取线程/进程 Id
+
+在分析多线程或多进程的时候，知道当前的在哪个线程或进程执行对于分析有很大帮助
+
+```
+Log.e("process Id: ", "" + android.os.Process.myPid())
+Log.e("thread Id", "" + Thread.currentThread().id)
+```

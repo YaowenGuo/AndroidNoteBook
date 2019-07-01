@@ -125,3 +125,26 @@ HTML Character entities often used in Android:
 | }      | `&#125;`                    |  |  |  |
 | &      | `&amp;`                     |  |  |  |
 | space  | `&#160;`                    |  |  |  |
+
+
+
+### 格式化字符换
+
+244
+
+You can do this even simplier:
+```XML
+android:text= "@{@string/generic_text(profile.name)}"
+```
+you string should be like this:
+```XML
+<string name="generic_text">My Name is %s</string>
+```
+Edit:
+
+Of course you can use as many variables as you need:
+```XML
+android:text= "@{@string/generic_text(profile.firstName, profile.secondName)}"
+
+<string name="generic_text">My Name is %1$s %2$s</string>
+```
