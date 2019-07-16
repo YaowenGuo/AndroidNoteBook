@@ -75,7 +75,8 @@
     * SQLite
   * Remote
 
-* [Problem](./problem.md)
+* [Problem](problem./problem.md)
+  * [Git bisect 一种定位为题的方法](problem/find_by_bisect.md)
 * structure
   * [Single Activity](./structure/single_activity.md)
   * [API data structure](./structure/data_structure.md)
