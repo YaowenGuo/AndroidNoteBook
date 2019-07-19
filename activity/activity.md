@@ -86,3 +86,7 @@ add - FLAG_ACTIVITY_NEW_TASK flag to your intent:
 ```
 myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 ```
+
+#### 点击图标会闪屏页启动
+
+https://www.jianshu.com/p/b202690b7d96

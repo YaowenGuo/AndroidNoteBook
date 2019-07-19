@@ -39,6 +39,7 @@
     * [Font](./xml/res/font.md)
   * widget
     * [Button](./xml/button.md)
+    * [ImageView](xml/ImageView.md)
 * widget
   * [GridView](./widget/gridview.md)
   * [WebView](./widget/webview.md)

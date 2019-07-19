@@ -148,3 +148,20 @@ Thread and Runnable 的子类
 Log.e("process Id: ", "" + android.os.Process.myPid())
 Log.e("thread Id", "" + Thread.currentThread().id)
 ```
+
+## 切换到主线程
+
+```
+if (Looper.myLooper() != Looper.getMainLooper()) {
+    // If we finish marking off of the main thread, we need to
+    // actually do it on the main thread to ensucorrect ordering.
+    Handler mainThread = new Hand(Looper.getMainLooper());
+    mainThread.post(new Runnable() {
+        @Override
+        public void run() {
+            mEventLog.add(tag, threadId);
+            mEventLog.finish(this.toString());
+        }
+    });
+}
+```
