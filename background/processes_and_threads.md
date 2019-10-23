@@ -165,3 +165,8 @@ if (Looper.myLooper() != Looper.getMainLooper()) {
     });
 }
 ```
+
+## 非阻塞
+
+由于实现不同，Kotlin 并没有实现 Python 迭代器类似的单线程非阻塞方式。 Kotlin 的非阻塞，其实是通过多线程实现的。
+

@@ -46,6 +46,7 @@ imageView.animate()
 - 时长 setDuration()
 - 动画插值器 setInterpolator()，用于控制动画的时间和完成度关系
 
+
 ViewPropertyAnimator 只实现了基本的几个功能，想要更多和更复杂的造作，需要用到 Animator 的子类。
 
 ## Animator 的复杂操作
@@ -103,6 +104,12 @@ AnimatorSet().apply {
 }
 
 ```
+
+- 设置执行次数 setRepeatCount(ObjectAnimator.REVERSE);
+    //设置为无数次呢 setRepeatCount(Animation.INFINITE);
+- 设置重复方式 setRepeatMode
+    - ValueAnimator.REVERSE 播放完毕直接翻转播放
+    - ValueAnimator.RESTART 播放完毕直接从头播放
 
 ### 指定关键帧
 
@@ -304,8 +311,19 @@ withEndAction() 设置的回调只有在动画正常结束时才会被调用，�
 }
 ```
 
+补间动画 和 属性动画定义[文件夹](https://blog.csdn.net/u014611408/article/details/96482832)的区别
 
 
+## 终止动画
 
+```
+我使用了以下方法，均未成功:
+
+1. 调用view中的clearAnimation()方法
+
+2. 调用Animation的cancel()方法；
+
+2.将播放动画的view invisible。
+```
 
 

@@ -17,3 +17,32 @@
 ```
 
 > the `?attr/` format is how you tell Android that this value should be resolved from your theme rather than directly from a resource.
+
+
+> 返回按钮
+
+```
+<android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:elevation="0dp"
+            app:navigationIcon="@drawable/nav_arrow_back_white"
+            app:title="@string/name_detail_title"
+            app:titleTextColor="@color/white"
+            app:titleTextAppearance="@style/Toolbar.TitleText">
+```
+
+点击
+
+```
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+```

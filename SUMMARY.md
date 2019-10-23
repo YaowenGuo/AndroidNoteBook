@@ -16,7 +16,8 @@
   * [Communication (Broadcast Rxbus)](./background/communication.md)
   * [Precess Thread Coroutines](./background/process_thread_coroutine.md)
   * [Service](./background/service.md)
-  * []
+* WorkManager
+  * [Manage your Android background jobs](background/workmanager.md)
 * [XML](xml.md)
   * [Click](./xml/click.md)
   * [Introduction](./xml/introduction.md)
@@ -57,6 +58,7 @@
   * [TextSwitcher](widget/TextSwitcher.md)
   * [Toast](widget/toast.md)
   * [悬浮窗](widget/float_window.md)
+  * [Radio & Swit button](widget/radio_and_switch.md)
 
 * View
   * [PieChart](./view/pie_chart.md)
@@ -77,7 +79,8 @@
   * Remote
 
 * [Problem](problem./problem.md)
-  * [Git bisect 一种定位为题的方法](problem/find_by_bisect.md)
+  * [Git bisect 一种定位问题的方法](problem/find_by_bisect.md)
+  * [OOM](problem/oom.md)
 * structure
   * [Single Activity](./structure/single_activity.md)
   * [API data structure](./structure/data_structure.md)
@@ -106,4 +109,5 @@
 * [5.0 以下版本适配](adaptation_below5.md)
 * Kotlin
   * [function](kotlin/function.md)
+  * [Coroutine](kotlin/coroutine/README.md)
 

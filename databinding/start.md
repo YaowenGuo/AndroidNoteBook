@@ -324,8 +324,466 @@ fun setImageUrl(imageView: ImageView, url: String?, placeHolder: Drawable?) {
 ```
 
 
+#### 绑定参数
+
+适配器的第一个参数是目标 View 的实例本身。后面的参数，如果设置类型的绑定适配器，例如 `android:text`, `android:background` ，则参数类型是 xml 绑定表达式转换之后的类型。
+
+```
+@BindingAdapter("imageUrl", "error")
+fun loadImage(view: ImageView, url: String, error: Drawable) {
+    Picasso.get().load(url).error(error).into(view)
+}
+
+<ImageView app:imageUrl="@{venue.imageUrl}" app:error="@{@drawable/venueError}" />
+```
+
+`app:imageUrl="@{venue.imageUrl}"` 的类型是 String 类型， 而 `app:error="@{@drawable/venueError}"` 类型是 `@drawable/venueError`。
 
 
+对于监听类型的适配器，参数是 Databingding 构造的监听器本身。例如，
+
+```
+const val CLICK_FILTER_MILLISECONDS = 1000
+
+@BindingAdapter("android:onClick")
+fun setOnClick(view: View, clickListener: View.OnClickListener) {
+    var mHits = 0L
+    view.setOnClickListener {
+        if (mHits < (SystemClock.uptimeMillis() - CLICK_FILTER_MILLISECONDS)) {
+            mHits = SystemClock.uptimeMillis()
+            clickListener.onClick(it)
+        }
+    }
+}
+
+android:onClick="@{() -> listener.anonymousLogin()}"
+```
+
+`listener.anonymousLogin()` 被 Databinding 生成的监听器调用， 而监听器的生成类型由是适配器的其后的参数决定 `setOnClick(view: View, clickListener: View.OnClickListener)`。
 
 
+#### 获取旧值
 
+绑定适配器可以选择使用旧值，只要在声明适配器时增加参数数量，所有旧值会在前面，新值在后面传入。
+
+```
+@BindingAdapter("android:paddingLeft")
+fun setPaddingLeft(view: View, oldPadding: Int, newPadding: Int) {
+    if (oldPadding != newPadding) {
+        view.setPadding(padding,
+                    view.getPaddingTop(),
+                    view.getPaddingRight(),
+                    view.getPaddingBottom())
+    }
+}
+```
+
+#### 事件监听
+
+事件处理程序绑定只能用于只有一个抽象方法的监听器接口或者抽象类。
+
+```
+@BindingAdapter("android:onLayoutChange")
+fun setOnLayoutChangeListener(
+        view: View,
+        oldValue: View.OnLayoutChangeListener?,
+        newValue: View.OnLayoutChangeListener?
+) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        if (oldValue != null) {
+            view.removeOnLayoutChangeListener(oldValue)
+        }
+        if (newValue != null) {
+            view.addOnLayoutChangeListener(newValue)
+        }
+    }
+}
+
+<View android:onLayoutChange="@{() -> handler.layoutChanged()}"/>
+```
+
+当一个监听器有多个方法时，必须将其拆分为多个监听器。例如，View.OnAttachStateChangeListener有两种方法：OnViewAttachedToWindow(View) 和OnViewDetachedFromWindow(View)。 数据绑定库提供两个接口来区分属性和处理程序：
+
+```
+// Translation from provided interfaces in Java:
+@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+interface OnViewDetachedFromWindow {
+    fun onViewDetachedFromWindow(v: View)
+}
+
+@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+interface OnViewAttachedToWindow {
+    fun onViewAttachedToWindow(v: View)
+}
+```
+
+因为更改一个监听器也会影响另一个监听器，所以需要一个适用于任一属性或同时适用于两个属性的适配器。可以在注释中将RequireAll设置为false，以指定并非每个属性都必须分配绑定表达式，如下例所示：
+
+```
+@BindingAdapter(
+        "android:onViewDetachedFromWindow",
+        "android:onViewAttachedToWindow",
+        requireAll = false
+)
+fun setListener(view: View, detach: OnViewDetachedFromWindow?, attach: OnViewAttachedToWindow?) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+        val newListener: View.OnAttachStateChangeListener?
+        newListener = if (detach == null && attach == null) {
+            null
+        } else {
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    attach.onViewAttachedToWindow(v)
+                }
+
+                override fun onViewDetachedFromWindow(v: View) {
+                    detach.onViewDetachedFromWindow(v)
+                }
+            }
+        }
+
+        val oldListener: View.OnAttachStateChangeListener? =
+                ListenerUtil.trackListener(view, newListener, R.id.onAttachStateChangeListener)
+        if (oldListener != null) {
+            view.removeOnAttachStateChangeListener(oldListener)
+        }
+        if (newListener != null) {
+            view.addOnAttachStateChangeListener(newListener)
+        }
+    }
+}
+```
+
+上面的示例比普通的稍微复杂一些，因为视图类使用 `addOnAttachStateChangeListener()` 和`removeOnAttachStateChangeListener()` 方法，而不是 `OnAttachStateChangeListener` 的 setter 方法。android.databinding.adapters.listenerUtil 类帮助跟踪以前的侦听器，以便在绑定适配器中删除它们。
+
+通过用 `@TargetApi(VERSION_CODES.HONEYCOMB_MR1)` 注释 `viewDetachedFromWindow` 和`onviewAttachedToWindow` 的接口，数据绑定代码生成器知道只有在android 3.1（api级别12）及更高版本上运行时才应生成侦听器，该版本与 `addOnAttachStateChangestener()` 方法支持的版本相同。
+
+
+### 类型转换
+
+#### 自动类型转换
+
+当从绑定表达式返回对象时，绑定库选择用于设置属性值的方法。对象被强制转换为所选方法的参数类型。这种行为在使用ObservableMap类存储数据的应用程序中很方便，如下例所示：
+
+```
+
+```
+
+注意：您也可以使用object.key表示法引用映射中的值。例如，上面示例中的 `@{usermap[“lastname”]}` 可以替换为 `@{usermap.lastname}`。
+
+
+#### 自定义转换
+
+在某些情况下，需要在特定类型之间进行自定义转换。例如，视图的android:background属性需要可绘制，但指定的颜色值是整数。下面的示例显示了一个需要可绘制的属性，但提供了一个整数：
+
+```
+<View
+   android:background="@{isError ? @color/red : @color/white}"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/>
+```
+
+每当需要 drawable 但是返回整数时，int应转换为colordrawable。可以使用带有bindingConversion注释的静态方法进行转换，如下所示：
+
+```
+@BindingConversion
+fun convertColorToDrawable(color: Int) = ColorDrawable(color)
+```
+
+但是，绑定表达式中提供的值类型必须一致。不能在同一表达式中使用不同的类型，如下例所示：
+
+```
+<View
+   android:background="@{isError ? @drawable/error : @color/white}"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/>
+```
+
+## 将布局视图绑定到架构组件
+
+Databinding 能够与架构组件无缝衔接，以简化 UI 开发流程。
+
+### 在数据更改时 使用 LiveData 更新 UI
+
+LiveData 可以直接用于设局绑定，当数据内容改变时自动跟新 UI。 LiveData 对象了解订阅数据更改的观察者的生命周期，这种技术有很多好处。在android studio 3.1及更高版本中，您可以用数据绑定代码中的livedata对象替换可观察字段。
+
+要将 LiveData 对象与绑定类一起使用，需要 `binding.setLifecycleOwner(LifecycleOwner)` 指定生命周期所有者来定义 LiveData 对象的范围。 证明周期所有者即为 LiveData 的 `observer()` 方法接受的类型，用于生成观察方法。
+
+```Kotlin
+class BindingFragment : Fragment() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = DataBindingUtil.inflate(inflater, R.layout.binding_fragment, container, false)
+        binding.lifecycleOwner = this
+        return binding.root
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        viewModel = ViewModelProviders.of(requireActivity()).get(BindingViewModel::class.java)
+        
+        // Assign the component to a property in the binding class.
+        binding.viewModel = viewModel
+
+    }
+}
+```
+
+在 ViewModel 中声明 LiveData 对象
+
+```
+class BindingViewModel : ViewModel() {
+    var firstName: MutableLiveData<String>
+
+
+    init {
+        firstName = MutableLiveData<String>()
+        firstName.value = "Albert"
+    }
+}
+```
+
+在布局中直接使用，即可更新 UI 
+
+```
+<TextView
+    android:id="@+id/test_change"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@{viewModel.firstName}" />
+```
+
+使用 ViewModel 管理 UI 相关的数据，可以将 UI 逻辑移出布局并移入组件中，这样更易于测试。 数据绑定库确保在需要时将视图从数据源绑定和解除绑定。 关于 ViewModel 的更多好处，可参看 ViewModel 的使用。
+
+
+### 使用 Observable ViewModel 进行更多绑定控制
+
+类似于使用 LiveData 对象的方式，也可以使用实现 Observable 的 ViewModel 组件来通知 UI 组件数据更改。
+
+在某些情况下，使用 ViewModel 组件来实现 Observable 接口而不是使用 LiveData 对象更方便，即使这样丢失了LiveData的生命周期管理功能。使用实现 Observable 的 ViewModel 组件可以更好地控制应用程序中的绑定适配器。例如，此模式使可以在数据更改时更好地控制通知，还允许指定自定义方法以在双向数据绑定中设置属性的值。
+
+要实现可观察的 ViewModel 组件，必须创建一个继承自 ViewModel 类并实现 Observable 接口的类。当观察者使用addOnPropertyChangedCallback（）和removeOnPropertyChangedCallback（）方法订阅或取消订阅通知时，你可以提供自定义逻辑。还可以提供在 notifyPropertyChanged() 方法中属性更改时运行的自定义逻辑。以下代码示例演示如何实现可观察的ViewModel：
+
+```
+class BindingViewModel : ViewModel(), Observable {
+    private val callbacks: PropertyChangeRegistry = PropertyChangeRegistry()
+
+    @get:Bindable
+    var firstName: String = ""
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.firstName)
+        }
+
+    init {
+        firstName = "Albert"
+    }
+
+    override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
+        callbacks.remove(callback)
+    }
+
+    override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
+        callbacks.add(callback)
+    }
+
+
+    /**
+     * Notifies observers that all properties of this instance have changed.
+     */
+    fun notifyChange() {
+        callbacks.notifyCallbacks(this, 0, null)
+    }
+
+    /**
+     * Notifies observers that a specific property has changed. The getter for the
+     * property that changes should be marked with the @Bindable annotation to
+     * generate a field in the BR class to be used as the fieldId parameter.
+     *
+     * @param fieldId The generated BR id for the Bindable field.
+     */
+    fun notifyPropertyChanged(fieldId: Int) {
+        callbacks.notifyCallbacks(this, fieldId, null)
+    }
+}
+```
+
+此实现不是线程安全的，但对于 LiveData 这种类型的方法对象，确定运行在主线程反而能够加快运行效率。想要使用 线程安全方法，可以使用 DataBinding 提供的 Observable 更加方便。
+
+@get:Bindable 注解回生成位于 BR 类中的字段 ID，该 ID 可以在调用 `callbacks.notifyCallbacks(this, fieldId, null)` 时更新。
+
+关联布局文件
+
+```xml
+<data>
+    <variable
+        name="viewModel"
+        type="tech.yaowen.customview.ui.databinding.BindingViewModel" />
+</data>
+
+```
+
+使用
+
+```
+<TextView
+    android:id="@+id/test_change"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@{viewModel.firstName}" />
+```
+
+
+## 双向绑定
+
+在单向绑定的时候，监听变化和设置 UI 需要单独设置属性
+
+```
+<CheckBox
+    android:id="@+id/rememberMeCheckBox"
+    android:checked="@{viewModel.rememberMe}"
+    android:onCheckedChanged="@{viewModel.rememberMeChanged}"
+/>
+```
+
+双向绑定提供了这种类型处理的快捷方式
+```
+<CheckBox
+    android:id="@+id/rememberMeCheckBox"
+    android:checked="@={viewModel.rememberMe}"
+/>
+```
+
+`@=` 符号，接收对属性的数据更改并同时侦听用户更新。
+
+为了对数据中的更改做出响应，可以将布局变量设置为 Observable（通常为baseObservable）的实现，并使用 `@bindable` 注释来生成绑定变量，如以下代码段所示：
+
+```Kotlin
+class BindingViewModel : BaseObservable {
+    private val callbacks: PropertyChangeRegistry = PropertyChangeRegistry()
+
+    var rememberMe = false
+        @Bindable get() {
+            return field
+        }
+        set(value) {
+            // Avoids infinite loops.
+            if (field != value) {
+                field = value
+
+                // React to the change.
+                // saveData()
+
+                // Notify observers of a new value.
+                notifyPropertyChanged(BR.rememberMe)
+            }
+        }
+}
+
+```
+
+- Java 和 Kotlin 是单继承的，但是是多实现的，如果有其他类需要继承，可以自己实现 Observable 代替 BaseObservable。 方法拷贝即可。
+- `BR.rememberMe` 是根据 `@Bindable` 标注的方法名生成的，跟变量名无关，甚至可以不存在该变量，而使用数据类中的属性。例如上面的 `getRememberMe` 方法生成变量为 `BR.rememberMe`。
+- set 方法也与 `@Bindable` 注解的方法对应。 `getRememberMe` 对应的 setter 方法为 `setRememberMe`。
+- 双向绑定仅对一些常用监听进行了实现，[查看全部默认实现](https://developer.android.com/topic/libraries/data-binding/two-way#two-way-attributes)
+
+
+### 使用自定义属性进行双向数据绑定
+
+如果提供的双向绑定无法满足需要，可以使用 `@InverseBindingAdapter` 和 `@InverseBindingMethod` 注释自定义属性进行双向数据绑定。
+
+
+例如给一个自定义时间组件 MyView 的时间进行双向绑定。
+
+1. 使用 `@bindingadapter` 注释设置当值被改变时，设置初始值和更新的方法：
+
+```Kotlin
+@BindingAdapter("time")
+@JvmStatic fun setTime(view: MyView, newValue: Time) {
+    // Important to break potential infinite loops.
+    if (view.time != newValue) {
+        view.time = newValue
+    }
+}
+```
+
+2. 使用 `@inversebindingadapter` 注解从视图中读取值的方法：
+
+```
+@InverseBindingAdapter("time")
+@JvmStatic fun getTime(view: MyView) : Time {
+    return view.getTime()
+}
+```
+
+此时，数据绑定知道当数据更改时要做什么（调用 @bindingadapter 注解的方法）以及当视图属性更改时要调用什么（调用 InverseBindingListener 注解的方法）。但是，它不知道属性何时或如何更改。
+
+为此，需要在视图上设置一个监听器。可以是与自定义视图关联的自定义侦听器，也可以是常规事件，例如焦点丢失或文本更改。将 `@bindingadapter` 注解添加到为属性的更改设置侦听器的方法中：
+
+```
+@BindingAdapter("app:timeAttrChanged")
+@JvmStatic fun setListeners(
+        view: MyView,
+        attrChange: InverseBindingListener
+) {
+    // Set a listener for click, focus, touch, etc.
+}
+```
+
+侦听器包含一个反向绑定侦听器作为参数。你可以使用反向绑定侦听器告诉数据绑定系统该属性已更改。然后，系统可以开始调用 `@InverseBindingAdapter` 进行注释的方法。
+
+注意：每个双向绑定都会生成一个合成事件属性。此属性与基属性同名，但它包含后缀 `AttrChanged`。合成事件属性使用 `@bindingadapter` 注释的方法创建方法，以将事件侦听器关联到适当的视图实例。
+
+### 转换器
+
+如果绑定到视图对象的变量在显示前需要格式化、转换或以某种方式更改，则可以使用转换器对象。
+
+例如，以显示日期的EditText对象为例：
+
+```
+<EditText
+    android:id="@+id/birth_date"
+    android:text="@={Converter.dateToString(viewmodel.birthDate)}"
+/>
+```
+
+viewModel.birthDate属性包含long类型的值，因此需要使用转换器对其进行格式化。
+
+在使用的是双向表达式，还需要有一个反向转换器，让库知道如何将用户提供的字符串转换回支持的数据类型，在本例中是 Long 类型的时间戳。 通过 `@InverseMethod ` 注解声明一个转换器，对应的关联一个反向转换器，并让此注释引用反向转换器。例如：
+
+```
+object Converter {
+    @InverseMethod("stringToDate")
+    fun dateToString(
+        view: EditText, oldValue: Long,
+        value: Long
+    ): String {
+        // Converts long to String.
+    }
+
+    fun stringToDate(
+        view: EditText, oldValue: String,
+        value: String
+    ): Long {
+        // Converts String to long.
+    }
+}
+```
+
+### 避免双向绑定无线循环
+
+
+使用双向数据绑定时，注意不要引入无限循环。当用户更改属性时，将调用 `@InverseBindingAdapter` 注解的方法，并将该值分配给属性。反过来，这将调用使用 `@BindingAdapter` 注解的方法。这是，又会触发使用`@InverseBindingAdapter` 注解的方法的另一次调用，依此类推。因此，通过比较使用 `@BindingAdapter` 注解的方法中的新值和旧值来打破可能的无限循环是很重要的。
+
+```
+@BindingAdapter("time")
+@JvmStatic fun setTime(view: MyView, newValue: Time) {
+    // Important to break potential infinite loops.
+    if (view.time != newValue) {
+        view.time = newValue
+    }
+}
+```
