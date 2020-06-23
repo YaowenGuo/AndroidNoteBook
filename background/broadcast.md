@@ -2,12 +2,12 @@
 
 # 消息/事件（发布-订阅设计模式）
 
-不同页面甚至应用之间的消息（事件）传递，事件响应至关重要，因为在一个页面的事件处理，可能响应的要更新另一页面的显示效果，或者作出响应的响应。例如在首页显示的消息数量，在进入一个消息后，首页的消息数量应该减少或者消失。
+不同页面甚至应用之间的消息（事件）传递，事件响应至关重要，因为在一个页面的事件处理，可能响应的要更新另一页面的显示效果，或者作出响应的响应。例如在首页显示的消息数量，在进入一个消息后，首页的消息数量应该减少或者消失。
 
 
 ## 系统自带 Broadcasts 和 Broadcast receivers
 
- Broadcasts are messaging components used for communicating across different apps, and also with the Android system, when an event of interest occurs. Broadcast receivers are the components in your Android app that listen for these events and respond accordingly.
+ Broadcasts are messaging components used for communicating across different apps, and also with the Android system, when an event of interest occurs. Broadcast receivers are the components in your Android app that listen for these events and respond accordingly.
 
 从名字就可以看出，这是一对消息处理组件。一个用于发送，一个用户接收。
 
@@ -19,11 +19,11 @@ Broadcasts 是Android系统和Android应用在发生可能影响其他应用功�
 - 系统广播由系统提供。
 - 自定义广播由您的应用提供。
 
-> 系统广播，系统发出的
+> 系统广播，系统发出的
 
 - 系统广播必须注册进行监听才能收到。
 - 从Android 7.0开始，不支持系统广播操作ACTION_NEW_PICTURE和ACTION_NEW_VIDEO。
-- 要获取系统可以为特定SDK版本发送的完整广播操作列表，请检查SDK文件夹中的broadcast_actions.txt文件，位于以下路径：Android / sdk / platforms / android-xx / data，其中xx是
+- 要获取系统可以为特定SDK版本发送的完整广播操作列表，请检查SDK文件夹中的 `broadcast_actions.txt` 文件，位于以下路径：`Android/sdk/platforms/android-xx/data`，其中 `xx` 是
 SDK版本。
 
 > 自定义广播
@@ -71,7 +71,7 @@ public void sendOrderedBroadcast() {
 ```
 
 
-### 广播接收器
+### 广播接收器
 
 广播接收器是可以接收系统事件或应用事件的应用程序组件。当事件发生时，通过 Intent 通知已注册的广播接收器。例如，如果您正在开发媒体应用程序并且您想知道用户何时连接或断开耳机，请注册 ACTION_HEADSET_PLUG Intent 操作。
 
@@ -162,22 +162,23 @@ LocalBroadcastManager.getInstance（本）
 
 ### 最佳做法
 
-- 在您的意图操作中，将String常量作为应用程序包名称的前缀。否则，您可能会与其他应用的意图冲突。Intent命名空间是全局的。
+- 启动广播的 `Intent#action` 参数，将应用程序包名称作为 String 常量的前缀。否则，可能会与其他应用的意图冲突。Intent命名空间是全局的。
+- 使用本地接收器
 - 如上所述，限制广播接收器。
 - 优先使用动态广播替代静态广播接收器。
-- 不要从广播接收器启动活动 - 而是使用通知。如果多个接收器正在侦听相同的广播事件，则从广播接收器开始活动会导致糟糕的用户体验。
-- 在onReceive（）之后，系统可以随时终止进程以回收内存，并且这样做会终止在进程中运行的生成线程。要避免这种情况，永远不要在广播接收器的onReceive（Context，Intent）方法中执行长时间运行的操作，因为该方法在主UI线程上运行。请考虑使用JobScheduler或WorkManager，goAsync()。
+- 不要从广播接收器启动活动 --- 而是使用通知。如果多个接收器正在侦听相同的广播事件，则从广播接收器开始活动会导致糟糕的用户体验。
+- 在onReceive（）之后，系统可以随时终止进程以回收内存，并且这样做会终止在进程中运行的生成线程。要避免这种情况，永远不要在广播接收器的onReceive（Context，Intent）方法中执行长时间运行的操作，因为该方法在主UI线程上运行。请考虑使用JobScheduler或WorkManager.goAsync()。
 
 ### 系统限制
 
-但是，您必须小心，不要滥用机会响应广播并在后台运行可能导致系统性能降低的任务。 安卓系统后台常常有许多服务在运行，为什么如此多的的服务被一次性触发，甚至是同为为了响应一个隐式广播，隐式广播是定义一个事件，用于替代调用特定 app 的事件触发器，这意味着将一些数据传递给另一个应用程序为您完成任务的合理用例将丢失(meaning that the reasonable use case of passing some date along to another app to da a task for you is lost.)。相反，我们有一个疯狂的应用站起来，大喊它只是做了一些酷的事情, 有谁来看？(Instead, we have the madness of a single app standing up and shouting that it just did something cool. Who wants to come see?)。更糟糕的是，有的很多 app 在 manifest 中声明了静态的广播接收器监听这些广播，即使这些APP从广播中接收到事件后不会运行，因此它仅仅是为了回应而被唤醒。最糟糕的是一个 app 被唤醒去查看然后发现一点也不感兴趣，从而浪费了几个 RAM 周期。这种情况最常见的例子是电源连接改变，在一些设备上，这个广播甚至引起40多个APP被唤醒。当他频繁发生时，几分钟内就有几百次的唤醒，削弱设备的性能。作为解决方案，谷歌移除了电源连接以及几个（NEW_PCITURE, MEW_VIDEO）引起这类问题的广播通知。这些问题不是 App 自身能够解决的，所以安卓平台给出了方案。安卓通知的改变有：
-1. Target API N 及以上的 APP 在 manifest 中声明如下广播接收将不会被再被唤醒。 只有在 App 运行着，并且动态注册了该事件的广播，才能接收到改广播。如果你的确有一些工作需要再电源连接状态改变时执行，无论 APP 是否在运行。你需要使用 JobScheduler 创建一个任务或者使用 Firebase 的 JobDispatcher 用户网络连接状态改变监听你真整关心的而不是被动地监听和被唤醒。 然后再去检查电源连接才是正确的方式。当你的 APP 使用 JobScheduler 的时候，其他 App 也在使用它，系统可以批处理这些任务，总体上会使结果更稳定。
+但是，您必须小心，不要滥用机会。响应广播并在后台运行可能导致系统性能降低的任务。 安卓系统后台常常有许多服务在运行，为什么如此多的的服务被一次性触发，甚至是为了响应一个隐式广播，隐式广播是定义一个事件，用于替代调用特定 app 的事件触发器，这意味着将一些数据传递给另一个应用程序为您完成任务的合理用例将丢失(meaning that the reasonable use case of passing some date along to another app to da a task for you is lost.)。相反，我们有一个疯狂的应用站起来，大喊它只是做了一些酷的事情, 有谁来看？(Instead, we have the madness of a single app standing up and shouting that it just did something cool. Who wants to come see?)。更糟糕的是，有的很多 app 在 manifest 中声明了静态的广播接收器监听这些广播，即使这些APP从广播中接收到事件后不会运行，因此它仅仅是为了回应而被唤醒。最糟糕的是一个 app 被唤醒去查看然后发现一点也不感兴趣，从而浪费了几个 RAM 周期。这种情况最常见的例子是电源连接改变，在一些设备上，这个广播甚至引起40多个APP被唤醒。当他频繁发生时，几分钟内就有几百次的唤醒，削弱设备的性能。作为解决方案，谷歌移除了电源连接以及几个（NEW_PCITURE, MEW_VIDEO）引起这类问题的广播通知。这些问题不是 App 自身能够解决的，所以安卓平台给出了方案。安卓通知的改变有：
+1. Target API N 及以上的 APP 在 manifest 中声明如下广播接收将不会被再被唤醒。 只有在 App 运行着，并且动态注册了该事件的广播，才能接收到改广播。如果你的确有一些工作需要再电源连接状态改变时执行，无论 APP 是否在运行。你需要使用 JobScheduler 创建一个任务或者使用 Firebase 的 JobDispatcher 用户网络连接状态改变监听你真整关心的而不是被动地监听和被唤醒。 然后再去检查电源连接才是正确的方式。当你的 APP 使用 JobScheduler 的时候，其他 App 也在使用它，系统可以批处理这些任务，总体上会使结果更稳定。
 
-2. 另一种情况是 NEW_PCITURE, MEW_VIDEO，这是一个关键的用户体验点，因为唤醒所有的 APP 引起的相机性能下降会毁掉用户的使用体验。 这些广播不是由系统发送的，而是App，例如相机。 这两个通知并不针对特定的App， 所有App 都不会再接收到该事件的广播，无论 Target API 版本是什么。这两个广播在 API 24 （7.0）被废弃掉了。替代方案仍然是 JobScheduler，新的 JobScheduler 包含一个 Content Provider 作为触发器。谷歌正在尽力消除被动的静态接收器。
+2. 另一种情况是 NEW_PCITURE, MEW_VIDEO，这是一个关键的用户体验点，因为唤醒所有的 APP 引起的相机性能下降会毁掉用户的使用体验。 这些广播不是由系统发送的，而是App，例如相机。 这两个通知并不针对特定的App， 所有App 都不会再接收到该事件的广播，无论 Target API 版本是什么。这两个广播在 API 24 （7.0）被废弃掉了。替代方案仍然是 JobScheduler，新的 JobScheduler 包含一个 Content Provider 作为触发器。谷歌正在尽力消除被动的静态接收器。
 
 3. 从android 9（api级别28）开始，NETWORK_STATE_CHANGED_ACTION 广播不会接收到关于用户位置或个人身份数据的信息。
 
 此外，如果您的应用程序安装在运行Android 9或更高版本的设备上，则来自Wi-Fi的系统广播不包含SSID、BSSID、连接信息或扫描结果。要获取此信息，请改为调用getConnectionInfo（）。
 4. 如果您的应用程序以Android 8.0或更高版本为目标，则不能使用清单来声明大多数隐式广播（不专门针对您的应用程序的广播）的接收器。当用户正在使用您的应用程序时，您仍然可以使用上下文注册的接收器。
 
-5. 除移除 NEW_PCITURE, MEW_VIDEO 广播外，针对Android 7.0及更高版本的应用程序必须使用RegisterReceiver(BroadcastReceiver，Intentfilter）注册连接性广播。在 Manifest 中声明接收器不起作用。
+5. 除移除 NEW_PCITURE, MEW_VIDEO 广播外，针对Android 7.0及更高版本的应用程序必须使用RegisterReceiver(BroadcastReceiver，Intentfilter） 动态注册广播。在 Manifest 中声明接收器不起作用。

@@ -2,7 +2,7 @@
 
 ## Animation
 
-- 补间动画
+- 补间动画
 - [Drawable 动画]
     - [逐帧动画](frame_animation.md): 将图片顺序播放，就先电影的帧一样，形成动画。
     - [矢量动画](vector_animation.md): 使用属性动画实现矢量时间的变化
@@ -12,6 +12,7 @@
     - [Status Change Animate](animate_state_change.md) pressed、focused 等状态改变时应用动画
     - [Fling Animate](fling_animate.md) 类似于带有摩擦力的运动，动画会逐渐减慢并停止。适用于滑动视图。
     - [Spring Animate](spring_animate.md) 类弹簧动画，能以弹性的运行，再回到原点。
+- 过度动画
 
 
 

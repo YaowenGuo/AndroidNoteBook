@@ -25,53 +25,8 @@
 用户态，切换花费的资源更少
 
 
-由于协程只是一个概念定义，具体到不同的语言上有不同的实现方式。
+由于协程只是一个概念定义，具体到不同的语言上有不同的实现方式。在 Kotlin 中，需要如下的方式来实现生产者消费者关系，来看一个出让的例子。
 
-为了更好的理解协程的协作式，由于 Kotlin 没有实现单线程的协程，先看一个 Python 的迭代器示例。
-
-```Python
-def consumer():
-    r = ''
-    print('[CONSUMER] 1')
-    while True:
-        print('[CONSUMER] 2')
-        n = yield r
-        print('[CONSUMER] 3')
-        if not n:
-            print('[CONSUMER] 4')
-            return
-        print('[CONSUMER] Consuming %s...' % n)
-        r = '200 OK'
-
-def produce(c):
-    c.send(None)
-    n = 0
-    while n < 5:
-        n = n + 1
-        print('[PRODUCER] Producing %s...' % n)
-        r = c.send(n)
-        print('[PRODUCER] Consumer return: %s' % r)
-    c.close()
-
-c = consumer()
-produce(c)
-```
-
-这是一个生产者消费者模型。
-
-1. 首先调用c.send(None)启动生成器；
-2. 然后，一旦生产了东西，通过c.send(n)切换到consumer执行；
-3. consumer通过yield拿到消息，处理，又通过yield把结果传回；
-4. produce拿到consumer处理的结果，继续生产下一条消息；
-5. produce决定不生产了，通过c.close()关闭consumer，整个过程结束。
-
-整个流程无锁，由一个线程执行， yield 在获取不到值时，主动停止程序的执行（挂起）而执行其函数外的程序，而 produce 在生成数据之后，使用 `c.send` 主动恢复 consumer 的执行。produce和consumer协作完成任务，所以称为“协程”，而非线程的抢占式多任务。
-
-这种协作式的执行，还是阻塞式的，即一方执行的时候，只要不主动退出自己的执行，就一直占用着 CPU 的执行。
-
-## Kotlin 的协程使用
-
-在 Kotlin 中，需要如下的方式来实现。
 
 ```Kotlin
 val job = CoroutineScope(Dispatchers.Unconfined)
@@ -95,7 +50,9 @@ job.launch {
     channel.close()
 }
 ```
+
 运行的结果是
+
 ```
 Thread in main: Thread[main,5,main]
 Thread in cor1: Thread[main,5,main]
@@ -106,16 +63,21 @@ receive: 0
 receive: 1
 send 2
 receive: 2
-
-Process finished with exit code 0
 ```
+
+当 `channel.receive()` 方法发现没有数据时，主动让出了线程的执行，而其他线程携程则可以继续执行，而 `channel.send(x)` 函数发送完数据后，会激活公用一个 channel 的携程，从而 `receive()` 能够继续执行获取数据。
+
+
 从上面的协程大致能看出如下结果：
+
 1. Kotlin 协程块是非阻塞的，有点像多线程的运行方式。同一开码块的代码还是顺序运行的。 （打印的 send 和 receive 输出顺序）
 2. Kotlin 的协程可以运行在同一线程中 （打印结果的线程名）
 3. 想要以协作式方式运行的代码必须运行在协程作用域内部 （launch 函数参数）
 4. 一个协程可以创建多个代码块（使用 launch 函数创建）。
 
 上面的代码一下看不懂不要紧，只是展示了一下 Kotlin 协程的运行方式，接下来一点一点逐步讲解如何使用协程。要使用协程，第一步就是要创建协程。
+
+这种协作式的执行，还是阻塞式的，即一方执行的时候，只要不主动退出自己的执行，就一直占用着 CPU 的执行。
 
 ### 创建协程
 
@@ -127,10 +89,32 @@ implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
 // 协程平台相关库
 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
 ```
+
 - 核心库中包含的代码主要是协程的公共 API 部分。有了这一层公共代码，才使得协程在各个平台上的接口得到统一。
 - 平台库中包含的代码主要是协程框架在具体平台的具体实现方式。因为多线程在各个平台的实现方式是有所差异的
 
-创建一个协程，Kotlin 提供了三种方式创建协程
+
+> Kotlin 提供了三种方式创建协程
+
+- runBlocking 静态函数: 这种方式会阻塞所在的线程，具体后面说明。只有在任务结束后，线程才能结束，一般用于测试中，在实际开发中很少使用，特别是在 UI 线程用要避免阻塞线程。
+
+- launch 方法： 为协程指定一个上下文环境，是应用程序中使用最普遍的方式。
+
+- aync 方法: aync 创建的协程比 launch 创建的多实现了 Deferred 接口。它能够通过 `await()` 获取结果。
+
+
+launch 和 aync 创建的携程区别在于，aync 创建的协程有返回值。类似于 Java 的 `Callable`，之所以使用的人较少，是 Java 把这套接口设计的太复杂了，使用起来代码非常多。launch 创建的携程没有返回值，通过 `await()` 获取结果。
+
+
+...................................................>>>>>>>>>>>>>>>>>>>>
+
+ GlobalScope 创建的协程，按照官方文档说法，“协程的生命周期只受整个应用程序的生命周期限制”。如非特殊需要，一般不适用。可以通过 `isActice` 验证，一旦创建，除非人为终止掉，否则一直 `true`。
+
+
+launch 这种方法只能在协程作用域内，即一个协程的内部创建新协程。
+
+既然我们还不知道协程上下文是什么，就先用前两种方式作为示例。
+
 
 ```
 // 方法一，全局生命周期
@@ -144,6 +128,11 @@ runBlocking {
     println("World!") // 在延迟后打印输出
 }
 
+// 只能在协程内部调用 launch，创建子协程
+launch { // 在 runBlocking 作用域中启动一个新协程
+    println("World!")
+}
+
 // 方法三
 //                               ⬇ 指定一个协程环境。
 val job1 = CoroutineScope(Dispatchers.Unconfined)
@@ -151,22 +140,11 @@ val job1 = CoroutineScope(Dispatchers.Unconfined)
         println("World!") // 在延迟后打印输出
     }
 
-// 方法四 在协程内部调用 launch，创建子协程
-launch { // 在 runBlocking 作用域中启动一个新协程
-    println("World!")
-}
+
 
 ```
 
-方法一： GlobalScope 创建的协程，按照官方文档说法，“协程的生命周期只受整个应用程序的生命周期限制”。如非特殊需要，一般不适用。可以通过 `isActice` 验证，一旦创建，除非人为终止掉，否则一直 `true`。
-
-方法二： 这种方式会阻塞所在的线程，具体后面说明。一般不能在 UI 线程中使用。
-
-方法三： 为协程指定一个上下文环境，是应用程序中使用最普遍的方式。
-
-方法四： 这种方法只能在协程作用域内，即一个协程的内部创建新协程。
-
-既然我们还不知道协程上下文是什么，就先用前两种方式作为示例。
+..............................................................>>>>>>>>>>>>>>
 
 #### 协程的阻塞是什么意思？
 
@@ -192,6 +170,7 @@ Thread in cor1: Thread[main,5,main]
 Thread in cor2: Thread[main,5,main]
 Thread in main: Thread[main,5,main]
 ```
+
 可以看到，即便是第一个代码被延迟了。它仍旧在后面的代码之前输出，因为它阻塞了整个线程的执行。
 
 作为对比
@@ -211,6 +190,14 @@ fun main() {
 }
 ```
 
+为了能够让主线程等待协程的执行完毕，在主线程中添加了 `sleep` 函数，等待协程的执行完毕（至于为什么子协程为什么会有一个单独的线程，稍后解释。）。可以看到，这种方式启动的协程，不仅不会阻塞主线程，而且多个协程代码也是非阻塞的。
+
+```
+Thread in main: Thread[main,5,main]
+Thread in cor2: Thread[DefaultDispatcher-worker-2,5,main]
+Thread in cor1: Thread[DefaultDispatcher-worker-1,5,main]
+```
+
 如果不添加 `sleep` 函数，将会输出
 
 ```
@@ -220,15 +207,7 @@ Thread in main: Thread[main,5,main]
 这很奇怪，其实是主线程先实行完毕后结束了，导致子线程也跟着结束引起的。
 
 
-为了能够让主线程等待协程的执行完毕，在主线程中添加了 `sleep` 函数，等待协程的执行完毕（至于为什么子协程为什么会有一个单独的线程，稍后解释。）。可以看到，这种方式启动的协程，不仅不会阻塞主线程，而且多个协程代码也是非阻塞的。
-
-```
-Thread in main: Thread[main,5,main]
-Thread in cor2: Thread[DefaultDispatcher-worker-2,5,main]
-Thread in cor1: Thread[DefaultDispatcher-worker-1,5,main]
-```
-
-为了能够实现阻塞主线程以等待协程完成，又能够并行执行协程的方式。可以使用嵌套协程的方式。
+为了能够实现阻塞主线程以等待协程完成，又能够并行执行协程的方式。可以使用嵌套协程的方式。
 
 ```
 fun main() = runBlocking{

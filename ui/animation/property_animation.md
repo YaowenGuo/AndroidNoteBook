@@ -15,9 +15,6 @@
 
 
 
-
-
-
 # 属性动画
 
 View 自带的属性动画有: translation, rotate
@@ -47,12 +44,16 @@ imageView.animate()
 - 动画插值器 setInterpolator()，用于控制动画的时间和完成度关系
 
 
-ViewPropertyAnimator 只实现了基本的几个功能，想要更多和更复杂的造作，需要用到 Animator 的子类。
+
+ViewPropertyAnimator 只实现了基本的几个功能，想要更多和更复杂的造作，特别对于增加的属性设置方式，需要用到 Animator 的子类。
+
 
 ## Animator 的复杂操作
 
+
 ViewPropertyAnimator 是对 ValueAnimator 的封装。它是 Animator 的子类， 我们通常不会使用 Animator，而是使用它的子类 ValueAnimator（对基本数据类型做渐变）、 ObjectAnimator（对对象的属性做渐变）、AnimatorSet（对多个动画做组合）。
 
+最简单的就是使用 ObjectAnimator 来做，想要同时执行多个属性的同时动画，可以使用 `PropertyValuesHolder`，就需要使用 PropertyValuesHolder 来同时执行多个动画。
 
 ### ObjectAnimator
 
@@ -70,19 +71,11 @@ objAnim.start()
 
 - 如果想要动画自动更新 view，需要在 set 方法中调用 `invalidate()`。 `invalidate()` 标记需要刷新 View， 这样才能在下次 UI 绘制到来时，绘制新的内容个。否则由于 UI 优化的问题，会使用缓存的久数据绘制。
 
-由于 ObjectAnimator 只能修改单个属性，要想修改多个属性，就不得不使用 AnimatorSet
+由于 ObjectAnimator 只能修改单个属性，要想修改多个属性，需要重复设置和启动。多个属性联合动画更好的是使用 ViewPropertyAnimator
 
-> 组合动画
+### 组合动画 PropertyValuesHolder
 
-当要同时执行多个动画的时候，ViewPropertyAnimator 已经提供了同时实行的方法。
-
-```
-imageView.animate()
-    .translationX(100f)
-    .setStartDelay(1000)
-    .start()
-```
-但是对于增加的属性设置方式，由于动画要使用 ObjectAnimator 来做，这是由想要同时执行多个动画，就需要使用 PropertyValuesHolder 来同时执行多个动画。
+当要同时执行多个动画的时候，Property Animator 已经提供了同时实行的方法。
 
 ```kotlin
 val pvhX = PropertyValuesHolder.ofFloat("x", 50f)
@@ -92,7 +85,7 @@ ObjectAnimator.ofPropertyValuesHolder(myView, pvhX, pvhY).start()
 
 ### AnimatorSet
 
-PropertyValuesHolder 虽然能够执行多个动画，但是不能控制动画之间的循序和时间，因为这些属性是放在同一个动画中执行的。。
+PropertyValuesHolder 虽然能够执行多个动画，但是不能控制动画之间的循序和时间，因为这些属性是放在同一个动画中执行的。要想实现多个动画的不同控制，甚至实现多个 View 动画的组合排序，需要用到 `AnimatorSet`。
 
 
 ```kotlin
@@ -110,6 +103,11 @@ AnimatorSet().apply {
 - 设置重复方式 setRepeatMode
     - ValueAnimator.REVERSE 播放完毕直接翻转播放
     - ValueAnimator.RESTART 播放完毕直接从头播放
+
+### PropertyValueHolder
+
+`PropertyValueHolder` 用于单个 `View` 的多个属性之间的动画。`PropertyValuesHolder` 也能实现 
+
 
 ### 指定关键帧
 
@@ -132,7 +130,7 @@ ObjectAnimator.ofPropertyValuesHolder(target, pvhRotation).apply {
 
 
 
-### ValueAnimator
+## ValueAnimator
 
 动画属性有两个部分：
 - 计算动画值
@@ -140,9 +138,15 @@ ObjectAnimator.ofPropertyValuesHolder(target, pvhRotation).apply {
 
 ValueAnimator不执行第二部分，因此您必须侦听ValueAnimator计算的值的更新，并使用您自己的逻辑修改要设置动画的对象。因此我们通常不适用这个方法，而是使用 ObjectAnimator 来实现。
 
-### 估值器 (TypeEvaluator)
+## 估值器 (TypeEvaluator)
 
-安卓体用的默认动画只能生成 int(IntEvaluator)，float(FloatEvaluator)，color(ArgbEvaluator) 源和目标之间的过渡数据，用于动画。如果想要渐变的内容不在这些范围之内，就需要通过实现 `TypeEvaluator` 接口来自定义估值器。
+插值器(根据长，当前时间，计算得到 0 到 1 之间的完成度)
+ ↓
+估值器(根据完成度，属性值的初始值、结束值计算得到当前应该的实际值)
+ ↓
+监听器回调，设置 View 的属性。
+
+安卓体用的默认动画只能生成 int(IntEvaluator)，float(FloatEvaluator)，color(ArgbEvaluator) 源和目标之间的过渡数据，用于动画。如果想要渐变的内容不在这些范围之内，例如对于位置 `Point`或者字符串，就需要通过实现 `TypeEvaluator` 接口来自定义估值器。
 
 唯一要实现的方法就是 `evaluate`， 它传入动画进度，起始值，结束值。需要计算出当前进度的值，返回
 
@@ -156,7 +160,7 @@ ValueAnimator不执行第二部分，因此您必须侦听ValueAnimator计算的
 ```
 
 
-### 插值器 (Interpolators)
+## 插值器 (Interpolators)
 
 插值器是根据动画时间完成度计算动画完成度的方法。例如，当使用线性插值器时，时间过了 0.25，则动画也完成0.25，它们是正比的。然而当使用先加速，后减速的动画时，时间过了 0.25，可能动画只有 0.2。插值器就是计算这个时间完成度到动画完成度的映射的。
 
@@ -175,7 +179,7 @@ LinearInterpolator
 override fun getInterpolation(input: Float): Float = input
 ```
 
-#### 自定义插值器
+### 自定义插值器
 
 Android 已经提供了很多现有的插值器供使用，如果你有特殊的需求 Android 5.0 之后提供了更加直观的 `PathInterpolator` 来实现动画完成度的控制。
 
@@ -225,7 +229,7 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 @interpolator/linear_out_slow_in.xml
 ```
 
-### 设置监听器
+## 设置监听器
 
 设置监听器
 给动画设置监听器，可以在关键时刻得到反馈，从而及时做出合适的操作，例如在动画的属性更新时同步更新其他数据，或者在动画结束后回收资源等。
@@ -236,7 +240,7 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
 
 
-#### ViewPropertyAnimator.withStartAction/EndAction()
+### ViewPropertyAnimator.withStartAction/EndAction()
 这两个方法是 ViewPropertyAnimator 的独有方法。它们和 set/addListener() 中回调的  onAnimationStart() / onAnimationEnd() 相比起来的不同主要有两点：
 
 withStartAction() / withEndAction() 是一次性的，在动画执行结束后就自动弃掉了，就算之后再重用 ViewPropertyAnimator 来做别的动画，用它们设置的回调也不会再被调用。而  set/addListener() 所设置的 AnimatorListener 是持续有效的，当动画重复执行时，回调总会被调用。
@@ -327,3 +331,16 @@ withEndAction() 设置的回调只有在动画正常结束时才会被调用，�
 ```
 
 
+## 硬件加速
+
+`saveLayer` 用于绘制离屏缓冲，可以是软件的，也可以是硬件的。但是它太重了，影响性能。现在建议使用 setHardLayer
+
+1. setHardLayer 要放在构造函数中，除非动态修改，否则不要调用，因为每次调用都会刷新界面。它是对整个 View 应用的，要么更改，要么使用的是默认的。
+2. 它是本意并不是设置硬件加速的，而是设置离屏缓冲的。硬件加速由系统决定是否使用，并没有接口来设置启用硬件加速。离屏缓冲可以设置使用硬件缓冲还是软件，通过设置软件离屏缓冲，带来的附加功能就是没有使用硬件加速。离屏缓冲也会带来性能损耗，所以除非出现硬件绘制出现问题要关闭硬件加速，或者确实要使用离屏缓冲，否则要设置不适用离屏缓冲(LAYER_TYPE_NONE)。
+2. 支持三种类型
+    - LAYER_TYPE_SOFTWARE：软件离屏缓冲
+    - LAYER_TYPE_HARDWARE: 硬件离屏缓冲
+    - LAYER_TYPE_NONE：不适用缓冲，默认值。
+
+
+只有 `ViewPropertyAnimator` 支持的几个基本属性的动画使用硬件加速才有用，其它自定义属性都不管用。它可以使用　`ViewPropertyAnimator.withLayer()` 来更简介的设置。
