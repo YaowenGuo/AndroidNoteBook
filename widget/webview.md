@@ -3,7 +3,7 @@
 
 ## Android 8.0 上不显示
 
-设置了字体后，会导致 WebView 不显示。是 AndroidManifest.xml 中添加字体，自动添加了一个配置，删除即可，不影响字体的使用。
+设置了字体后，会导致 WebView 不显示。是 AndroidManifest.xml 中添加字体，自动添加了一个配置，删除即可，不影响字体的使用。
 
 Try to remove the preloading of fonts by removing
 ```
@@ -14,7 +14,8 @@ android:resource="@array/preloaded_fonts" />
 
 
 
-WebView 中除了链接跳转，其他的点击事件是无法获取到的。但是 Android 提供了一种 Js 和 native 调用的方法，可以在 WebView 中使用 js 调用本地方法并传递参数，或者向 WebView 中传递本地数据。
+WebView 中除了链接跳转，其他的点击事件是无法获取到的。但是 Android 提供了一种 Js 和 native 调用的方法，可以在 WebView 中使用 js 调用本地方法并传递参数，或者向 WebView 中传递本地数据。
+
 
 ## 1. 创建一个类，使用注解来标识哪些函数映射到 js 方法。
 
@@ -42,13 +43,13 @@ class JavascriptInterface {
 }
 ```
 
-## 2. 将调用接口注册到 webView 中
+## 2. 将调用接口注册到 webView 中
 
 ```
 WebView#addJavascriptInterface(new JavascriptInterface(), "webClickListener");
 ```
 
-其中 `webClickListener` 是 `new JavascriptInterface()` 在 js 中映射对象的引用，可以通过该引用调用对象中定义的方法。 其中可以通过 `webClickListener` 或 `window.webClickListener` 都可以调用。
+其中 `webClickListener` 是 `new JavascriptInterface()` 在 js 中映射对象的引用，可以通过该引用调用对象中定义的方法。 其中可以通过 `webClickListener` 或 `window.webClickListener` 都可以调用。
 
 ## 3. 定义 js, 调用 java 方法。
 ```
@@ -94,7 +95,7 @@ WebView#setWebViewClient(new WebViewClient() {
 
 ```
 
-或者将代码直接一字符长形式写死在代码中
+或者将代码直接一字符长形式写死在代码中
 
 ```
 private void addImageClickListener(WebView webView) {
@@ -125,7 +126,7 @@ public void onPageFinished(WebView view, String url) {
 }
 ```
 
-**需要注意的是，要在 WebView 中执行的 js 代码是严格模式，每条语句的后面都要使用分号 “;” 结束，否则会无法正常调用**
+**需要注意的是，要在 WebView 中执行的 js 代码是严格模式，每条语句的后面都要使用分号 “;” 结束，否则会无法正常调用**
 
 **js 的 Array 对应的是 java 的 Array 类型， ArrayList 没有测试对应的类型。**
 

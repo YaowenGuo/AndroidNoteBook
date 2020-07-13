@@ -15,6 +15,7 @@
 包括两个阶段：测量阶段和布局阶段。
 
 1. 测量阶段（计算）：从上到下递归地测量每一级，每一个子 View 的尺寸并计算它们的位置；
+
 2. 布局阶段（保存 父View 传进来的实际尺寸）：依然是从最顶级的 View 向下递归地把测得的它们的 `尺寸` 和 `位置` 赋值给它们。
 
 这样每个 View 的尺寸和位置就确定了，布局过程就算完成了。接下来就是绘制过程了，每个 View 会根据这些得到的尺寸和位置来进行自我绘制。
@@ -25,7 +26,7 @@
 
 > 为什么要将布局分为测量和布局两个子过程?
 
-其一，由于一些自适应属性的存在，例如 `match_parnent`， 一次测量可能无法得到正确的尺寸，需要多测测量。将测量和布局分开，一是测量过程独立，更加高效。二是过程更加清晰。
+其一，由于一些自适应属性的存在，例如 `match_parnent`， 一次测量可能无法得到正确的尺寸，需要多次测量。将测量和布局分开，一是测量过程独立，更加高效。二是过程更加清晰。
 其二，就是自己测量的尺寸不是最终的尺寸，需要交给父布局，由父布局结合自己剩余空间来得到最终尺寸，然后由 layout 交给自己。
 
 ### 测量过程的调用
@@ -43,11 +44,43 @@
 
 ### 布局阶段的调用
 
-  一个 View 的 `layout(...)` 方法会被它的父节点所调用，用于对 View 进行内部布局。和 `measure()` 方法一样，`layout(...)` 也只是一个调度方法，实际进行布局的是 `onLayout` 方法。
-  `onLayout` 内部会做两件事。 首先 `layout` 方法是有参数的，它的父几点在调用它的时候回把之前测量截断保存下来的这个 View 的尺寸和位置通过参数给传进来，而 `layout` 做的第一件事就是把这个尺寸和位置保存下来。测量阶段是父 View 统一保存所有子 View 的尺寸和位置，而到了布局阶段就是 View 保存自己的尺寸和位置了。
+  一个 View 的 `layout(...)` 方法会被它的父节点所调用，用于对 View 进行内部布局。和 `measure()` 方法一样，`layout(...)` 也只是一个调度方法，实际进行布局的是 `onLayout` 方法。`onLayout` 内部会做两件事。 
+  
+  - 首先 `layout` 方法是有参数的，它的父几点在调用它的时候回把之前测量阶段保存下来的这个 View 的尺寸和位置通过参数给传进来，而 `layout` 做的第一件事就是把这个尺寸和位置保存下来。测量阶段是父 View 统一保存所有子 View 的尺寸和位置，而到了布局阶段就是 View 保存自己的尺寸和位置了。
 
-  第二件事是它会调用自己的 `onLayout` 方法，这 `onLayout` 对自己进行真正的内部布局。
-  内部布局的意思是，它会调用每一个子 View 的 `layout` 方法，并且把他们的尺寸和位置作为参数传递给它们。对于简单的 View 来处，它的 `onLayout` 什么也不用做，就是一个空方法，之所以也要调用，是逻辑的统一。
+  - 第二件事 `onLayout` 对自己进行真正的内部布局。内部布局的意思是，它会调用每一个子 View 的 `layout` 方法，并且把他们的尺寸和位置作为参数传递给它们。对于简单的 View 来处，它的 `onLayout` 什么也不用做，就是一个空方法，之所以也要调用，是逻辑的统一。
+
+
+### 绘制过程
+
+
+```Java
+  public void draw(Canvas canvas) {
+    ...
+    // Step 1, draw the background, if needed
+    if (!dirtyOpaque) {
+      drawBackground(canvas);
+    }
+    ...
+    // Step 2, save the canvas' layers
+    saveCount = canvas.getSaveCount();
+    ...
+    // Step 3, draw the content
+    if (!dirtyOpaque) onDraw(canvas);
+
+    // Step 4, draw the children
+    dispatchDraw(canvas);
+
+    // Step 5, draw the fade effect and restore layers
+    canvas.drawRect(left, top, right, top + length, p);
+    ...
+    canvas.restoreToCount(saveCount);
+    ...
+    // Step 6, draw decorations (foreground, scrollbars)
+    onDrawForeground(canvas);
+  }
+```
+
 
 ## 布局过程的自定义
 
@@ -56,16 +89,20 @@
 > 注意： 重写的是 `onMeasure` 和 `onLayout` 方法，因为 `measure` 和 `layout` 是用来调度的，而真实进行测量的布局的是 `onMeasure` 和 `onLayout` 方法。
 
 具体过程可以分为三类
+
 1. 重写 `onMeasure` 来修改已有的 `View` 的尺寸。
 2. 重写 `onMeasure` 来全新计算自定义 `View` 的尺寸。
 3. 重写 `onMeasure` 和 `onLayout` 来全新计算自定 `ViewGroup` 的内部布局。
+
 ### 1. 重写 `onMeasure` 来修改已有的 `View` 的尺寸
 
 这一类是对一些已有的 View 进行修改尺寸。例如，修改 ImageView 的尺寸就属于这一类。他已经有自己的尺寸计算算法了，它的 `onMeasure` 已经正确计算出它的尺寸和位置，你不需要从新进行计算一遍。 只需要根据自己的需要进行相应的调整。做法
 
 
 1. 在重写的 `onMeasure` 方法中先调用 `super.onMeasure` 方法让它进行一次原有的测量。
+
 2. 然后增加代码，计算得到想要的尺寸。通过  `getMeasuredWidth` 和 `getMeasuredHeight` 获得测得的尺寸，然后重新计算尺寸。
+
 3. 保存新尺寸。计算尺寸并不是通过返回值返回给父 View 的，而是通过 `setMeasuredDimension` 方法把它存在自己内部。所有取的时候也是要用相应的方法来取： `getMeasuredWidth` 和 `getMeasuredHeight`。
 
 **注意，setMeasuredDimension 保存的是一个测得的尺寸，它会之后通过 layout 方法传进来的那个尺寸未必是相等的。这个 setMeasuredDimension 保存的尺寸是一个 View 对自己尺寸的期望值。然后父 View 会根据这个期望值再去判断，至于最终它是否会同意你这么大，还是要求你再去测量一次，或者是给你指派一个新尺寸，这个由父 View 来决定。最终它会通过 layout 的方法的参数来传给你。**
@@ -97,10 +134,14 @@ protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 ### 2. 重写 `onMeasure` 来全新计算自定义 `View` 的尺寸
 
  主要用于自定义 View, 这些 View 的绘制完全自己写的，这时，在尺寸上就没有现有的可作为基准的值修改使用。需要完全自己去计算它的尺寸。这种测量和第一种是有点不一样的：
+
  1. 不需要调用父类的 `onMeasure` 方法，而是完全自己计算尺寸。计算所有内部绘制的他们的间距，边距，得到最后的尺寸即可。
+
  2. 全新计算 View 尺寸，需要保证自己计算出的尺寸满足父布局的限制: 就是 `onMeasure` 方法的参数，父布局在调用子 view 的 `measure` 方法时，会将父布局对子 View 的限制作为参数传递过来， measure 方法在调用 `onMeasure` 方法时，又会原封不动地将其传递给 `onMeasure` 方法。
+
     1. 限制是怎么来的？父 View 为什么会对子 View 进行限制？
-    父 View 把开发者对子 View 的尺寸要求（就是开发者在 xml 文件中这个View写的以 `layout_` 开头的属性限制，它们使用来设置这个 View 的位置和尺寸的。）进行处理计算之后所得到的更精确的要求。`layout_` 开头的属性不是给 View 自己看的，而是给它的父 View 看的。也就是说在程序运行显示界面的时候，没一个 ViewGroup 会读取它的子 View 的 `layout_` 开头属性，然后用他们进行处理和计算，得出一个限制。这个限制分为三种：不限制，设置上限，固定值（为了流程的通一，要求子View 计算一遍）。如果不遵循这个限制，就会产生 bug，例如，这个现实是 500，偏要使用400，这时使用者写了 `match_parent` 属性，却发现并没有填充满父布局的可用尺寸，从而属性无效，达不到开发者的要求。
+    父 View 把开发者对子 View 的尺寸要求（就是开发者在 xml 文件中这个View写的以 `layout_` 开头的属性限制，它们使用来设置这个 View 的位置和尺寸的。）进行处理计算之后所得到的更精确的要求。`layout_` 开头的属性不是给 View 自己看的，而是给它的父 View 看的。也就是说在程序运行显示界面的时候，每一个 ViewGroup 会读取它的子 View 的 `layout_` 开头属性，然后用他们进行处理和计算，得出一个限制。这个限制分为三种：不限制，设置上限，固定值（为了流程的通一，要求子View 计算一遍）。如果不遵循这个限制，就会产生 bug，例如，这个现实是 500，偏要使用400，这时使用者写了 `match_parent` 属性，却发现并没有填充满父布局的可用尺寸，从而属性无效，达不到开发者的要求。
+
     2. 子 View 的 onMeasure 方法里面应该怎么做，才能满足父布局的限制。
 
     很简单，在计算完尺寸后，调用一个 `resolveSize` 来调整计算的数值，返回值就是修正之后的尺寸。然后把修正之后尺寸用 `setMeasuredDimension` 保存起来就行了。
