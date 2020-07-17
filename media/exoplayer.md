@@ -2,7 +2,8 @@
 
 > 是什么？
 
-建立在 Jelly Bean 之上的开源 Media playback library for android.(Java 语言编写) 
+建立在 Jelly Bean 之上的开源 Media playback library for android.(Java 语言编写)。相比于 MediaPlayer，它是一个应用层的　
+
 
 
 
@@ -44,6 +45,7 @@ MediaPlayer 简单场景，只支持离线播放。ExoPlayer 支持自适应播�
 Mediaplay 黑盒封装。ExoPlayer 可定制和扩展。
 
 ExoPlayer 更多的在应用层，只有少部分对硬件的访问，在安卓系统层。而 MediaPlayer 则基本都在系统层。
+![Code Level](images/compare_with_media_player.png)
 
 ExoPlayer 新特性可以完全向后兼容，而 MediaPlayer 新特性仅最一部分发行版起作用。如倍速播放。
 
