@@ -30,6 +30,7 @@ C/C++ 的编译分为编译，链接两部分。如果是作为函数调用，�
 要在当前平台编辑并使用 ffmpeg. 可以编译生成最新版本的应用。C/C++ 开源库都会提供一个 configure 的 shell 脚本, 用于生成编译的 Makefile文件。该脚本的配置非常复杂, 但一般都提供一个帮助选项。
 
 常规的安装只需要执行
+
 ```bash
 ./configure
 make
@@ -72,19 +73,24 @@ External library support: 扩展库
 
 ### 交叉编译
 
-交叉编译是在一个平台上生成另一个平台上的可执行代码。很显然，要在 linux 编译在 android 系统使用的 so 库就属于交叉编译。虽然安卓也是 linux 内核，但是平台是 ARM，要编译程 ARM 指令的函数库。
+交叉编译是在一个平台上生成另一个平台上的可执行代码。很显然，要在 linux 编译在 android 系统使用的 so 库就属于交叉编译。虽然安卓也是 linux 内核，但是平台是 ARM，要编译成 ARM 指令的可执行二进制文件。
 
 交叉编译也是使用 `configure` 进行配置，但是由于要配置的参数比较多，一不小心就会配置错误，或者需要多次修改，更方便的做法是再编写一个 shell 脚本文件，制定调用 configure 的参数并执行。
 
 
-需要说明的是，如果想要使用 lib 库，可以编译 lib 开发库，如果想要使用指令的方式运行，就不能屏蔽 `ffmpeg`, `fplay` 等命令行工具。
+调整 configure 的参数主要用于对编译进行调整，例如对编译器的优化等级进行配置，对运行目标平台进行设置，对编辑软件进行剪裁，只包含使用到的部分，其他功能的模块不编译，从而减小包体积。对于 ffmpeg 来说，如果想要使用 lib 库，可以只编译 lib 开发库，如果想要使用指令的方式运行，就不能屏蔽 `ffmpeg`, `fplay` 等命令行工具。
 
 可参考 https://blog.csdn.net/thezprogram/article/details/100029831
 
 ffmpeg参数讲解 https://blog.csdn.net/shulianghan/article/details/104351312
 
-废弃的方法，不能编译一些没有支持 clang 编译器的脚本。新的 NDK 删除了 gcc, 只提供了 clang 的编译器。因此为了兼容，google 添加了一个 python 脚本，用于生成对应的 toolchain。
+废弃的方法，不能编译一些没有支持 clang 编译器的脚本。NDK 17 开始默认使用 clang 作为编译器， NDK18 删除了 gcc, 只提供了 clang 的编译器。因此为了兼容，google 添加了一个 python 脚本，用于生成对应的 toolchain。
+
+
+由于部分软件不支持配置编译器，例如 `libx264`，仅支持 gcc 编译，因此以下自己配置编译 shell 的方式仅供参考。
+
 https://blog.csdn.net/yu540135101/article/details/105183294/
+
 ```bash
 #!/bin/bash
 
