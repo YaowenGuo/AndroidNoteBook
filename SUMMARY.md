@@ -103,14 +103,18 @@
 * Project
   * [Create]
   * [Cold starts](project/cold_start.md)
-  * [Order](./project/order.md)
+  * [Order](project/order.md)
   * [FilePath](project/file_path.md)
+  * config
+    * [gradle.properties](project/config/gradle.properties.md)
 * [Migrate to AndroidX](./migrate2androidx.md)
 * [5.0 以下版本适配](adaptation_below5.md)
 * Kotlin
   * [function](kotlin/function.md)
   * [Coroutine](kotlin/coroutine/README.md)
 * [MultiMedia](media/README.md)
+
+
 
 * Library desigin principle
   [RxJava](library/rxjava/README.md)
