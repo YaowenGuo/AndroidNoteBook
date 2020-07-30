@@ -84,7 +84,11 @@ External library support: 扩展库
 
 ffmpeg参数讲解 https://blog.csdn.net/shulianghan/article/details/104351312
 
-废弃的方法，不能编译一些没有支持 clang 编译器的脚本。NDK 17 开始默认使用 clang 作为编译器， NDK18 删除了 gcc, 只提供了 clang 的编译器。因此为了兼容，google 添加了一个 python 脚本，用于生成对应的 toolchain。
+废弃的方法，不能编译一些没有支持 clang 编译器的脚本。NDK 17 开始默认使用 clang 作为编译器， NDK18 删除了 gcc, 只提供了 clang 的编译器。
+
+NDK17 开始，`make_standalone_toolchain.py` 用于替换之前的 `make-standalone-toolchain.sh` 用于在 windows 不用配置 bash 环境也能编译，但是实际情况是许多使用 `Autoconf` 配置编译的三方库仍旧无法在 Windows 上编译。 
+
+从 NDK 19 开始，NDK 中默认带有 `toolchains` 可供使用，与任意构建系统进行交互时不再需要使用 make_standalone_toolchain.py 脚本。如果是 NDK 19 之前的版本，请查看 [NDK 18 及之前编译](https://developer.android.com/ndk/guides/standalone_toolchain)。
 
 
 由于部分软件不支持配置编译器，例如 `libx264`，仅支持 gcc 编译，因此以下自己配置编译 shell 的方式仅供参考。
