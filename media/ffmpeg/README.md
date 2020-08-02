@@ -75,25 +75,112 @@ External library support: 扩展库
 
 交叉编译是在一个平台上生成另一个平台上的可执行代码。很显然，要在 linux 编译在 android 系统使用的 so 库就属于交叉编译。虽然安卓也是 linux 内核，但是平台是 ARM，要编译成 ARM 指令的可执行二进制文件。
 
-交叉编译也是使用 `configure` 进行配置，但是由于要配置的参数比较多，一不小心就会配置错误，或者需要多次修改，更方便的做法是再编写一个 shell 脚本文件，制定调用 configure 的参数并执行。
+交叉编译主要配置使用的编译器，连接器，编译链接的目标平台（CPU架构）依赖库等。
 
+- 编译器：
+    - NDK17 开始，`make_standalone_toolchain.py` 用于替换之前的 `make-standalone-toolchain.sh` 用于在 windows 不用配置 bash 环境也能编译，但是实际情况是许多使用 `Autoconf` 配置编译的三方库仍旧无法在 Windows 上编译。 
+
+    - 从 NDK 19 开始，NDK 中默认带有 `toolchains` 可供使用，与任意构建系统进行交互时不再需要使用 make_standalone_toolchain.py 脚本。如果是 NDK 19 之前的版本，请查看 [NDK 18 及之前编译](https://developer.android.com/ndk/guides/standalone_toolchain)。
+    
+    - NDK 17 开始默认使用 clang 作为编译器， NDK18 删除了 gcc, 只提供了 clang 的编译器。
+
+    - 综上，现在编译三方库的最佳方式是使用 NDK `toolchain` 目录中的编译器工具链和平台库。使用 `gcc` 和 `make_standalone_toolchain.py` 等生成编译链的做法都是较陈旧的做法。
+
+- 配置：
+    - 常用的配置方法
+
+
+配置编译过程不同的项目有不同的做法，流程的做法是使用 `autoconf` 的 configure 配置，或者配置环境变量，执行 `Makefile`。 FFmpeg 是使用 `autoconf` 进行配置，但是由于要配置的 `configure` 参数比较多，一不小心就会配置错误，或者需要多次修改，更方便的做法是再编写一个 shell 脚本文件，制定调用 configure 的参数并执行。
 
 调整 configure 的参数主要用于对编译进行调整，例如对编译器的优化等级进行配置，对运行目标平台进行设置，对编辑软件进行剪裁，只包含使用到的部分，其他功能的模块不编译，从而减小包体积。对于 ffmpeg 来说，如果想要使用 lib 库，可以只编译 lib 开发库，如果想要使用指令的方式运行，就不能屏蔽 `ffmpeg`, `fplay` 等命令行工具。
 
 可参考 https://blog.csdn.net/thezprogram/article/details/100029831
 
 ffmpeg参数讲解 https://blog.csdn.net/shulianghan/article/details/104351312
-
-废弃的方法，不能编译一些没有支持 clang 编译器的脚本。NDK 17 开始默认使用 clang 作为编译器， NDK18 删除了 gcc, 只提供了 clang 的编译器。
-
-NDK17 开始，`make_standalone_toolchain.py` 用于替换之前的 `make-standalone-toolchain.sh` 用于在 windows 不用配置 bash 环境也能编译，但是实际情况是许多使用 `Autoconf` 配置编译的三方库仍旧无法在 Windows 上编译。 
-
-从 NDK 19 开始，NDK 中默认带有 `toolchains` 可供使用，与任意构建系统进行交互时不再需要使用 make_standalone_toolchain.py 脚本。如果是 NDK 19 之前的版本，请查看 [NDK 18 及之前编译](https://developer.android.com/ndk/guides/standalone_toolchain)。
-
-
-由于部分软件不支持配置编译器，例如 `libx264`，仅支持 gcc 编译，因此以下自己配置编译 shell 的方式仅供参考。
-
 https://blog.csdn.net/yu540135101/article/details/105183294/
+
+### 编译 x264
+
+创建 `.sh` 结尾的脚本文件，添加执行权限。
+
+```shell
+#!/bin/sh
+
+NDK=$NDK_HOME
+
+# NDK 编译环境，不同 OS 上要下载不同的 NDK，而这个文件夹是不同的。需要根据下载的 NDK 是运行在 Linux, Mac OS, Windows 上而配置不同的文件夹。
+HOST_TAG=darwin-x86_64
+
+TARGET=armv7a-linux-androideabi
+TARGET_AL=arm-linux-androideabi
+# export TARGET=aarch64-linux-android
+# export TARGET=i686-linux-android
+# export TARGET=x86_64-linux-android
+
+# Set this to your minSdkVersion.
+# 支持的最次版本
+export API=16
+
+export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
+
+# Configure and build.
+export AR=$TOOLCHAIN/bin/$TARGET_AL-ar
+export AS=$TOOLCHAIN/bin/$TARGET_AL-as
+export CC=$TOOLCHAIN/bin/$TARGET$API-clang
+export CXX=$TOOLCHAIN/bin/$TARGET$API-clang++
+export LD=$TOOLCHAIN/bin/$TARGET_AL-ld
+export RANLIB=$TOOLCHAIN/bin/$TARGET_AL-ranlib
+export STRIP=$TOOLCHAIN/bin/$TARGET_AL-strip
+echo $CC
+echo $CXX
+
+# 该库使用到 arm-linux-androideabi-strings，可以通过在环境变量里添加查找路径让其能够找到命令。
+PATH=$TOOLCHAIN/bin:$PATH
+
+
+# 不使用 $NDK_HOME 下的 /sysroot/
+SYSROOT=$TOOLCHAIN/sysroot/
+# 可以不设置，但是设置必须是对应架构的，例如 arm-linux-androideabi-
+CROSS_PREFIX=arm-linux-androideabi-
+
+INSTALL_DIR=$(pwd)/x264-$TARGET
+
+configure="--disable-cli \
+           --enable-static \
+           --enable-shared \
+           --disable-opencl \
+           --enable-strip \
+           --disable-cli \
+           --disable-win32thread \
+           --disable-avs \
+           --disable-swscale \
+           --disable-lavf \
+           --disable-ffms \
+           --disable-gpac \
+           --disable-lsmash"
+
+extra_configure="--disable-asm"
+
+#优化编译项
+extra_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=neon -mthumb -D__ANDROID__ -D__ARM_ARCH_7__ -D__ARM_ARCH_7A__ -D__ARM_ARCH_7R__ -D__ARM_ARCH_7M__ -D__ARM_ARCH_7S__"
+extra_ldflags="-nostdlib -lc"
+
+cd ./x264
+
+./configure    ${extra_configure} \
+    --prefix=$INSTALL_DIR \
+    --cross-prefix=$CROSS_PREFIX \
+    --sysroot=$SYSROOT \
+    --extra-cflags="${extra_cflags}" \
+    --host=$TARGET_AL
+# --host 指定成 armv7a-linux-androideabi 和 arm-linux-androideabi 都不出问题，应该是不设置也行。具体什么目录有关还没搞清楚。
+
+# this link flage whill cause linker error.
+#    --extra-ldflags="$extra_ldflags" \
+make clean
+make -j4
+make install
+```
 
 ```bash
 #!/bin/bash
