@@ -47,3 +47,21 @@
 
 ```
 
+
+### ToolBar 设置左侧返回按钮
+
+两种方式：
+#### 第一种：自定义返回按钮的样式和颜色
+
+在布局文件中添加属性设置
+```
+app:navigationIcon="@mipmap/title_bar_back"
+```
+或者使用代码设置：
+```
+mToolbar.setNavigationIcon();
+```
+
+### Title 居中
+
+

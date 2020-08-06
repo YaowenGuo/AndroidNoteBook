@@ -50,21 +50,6 @@ Most of the time the better place to restore the activity state is in onCreate()
 设置了这个之后，返回会先调用父 Activity 的 onDestroy 方法，从新创建。解决方案参考
 https://blog.csdn.net/mengweiqi33/article/details/41285699
 
-### Toolbar
-
-ToolBar 设置左侧返回按钮
-
-两种方式：
-#### 第一种：自定义返回按钮的样式和颜色
-
-在布局文件中添加属性设置
-```
-app:navigationIcon="@mipmap/title_bar_back"
-```
-或者使用代码设置：
-```
-mToolbar.setNavigationIcon();
-```
 #### 第二种：设置使用系统自带的返回按钮样式
 ```
 getSupportActionBar().setDisplayHomeAsUpEnabled(true);//左侧添加一个默认的返回图标
