@@ -1,0 +1,33 @@
+debugImplementation "com.facebook.stetho:stetho:$stethoVersion"
+debugImplementation "com.facebook.stetho:stetho-okhttp3:$stethoVersion"
+debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakcanaryVersion"
+
+
+implementation "com.blankj:utilcode:$utilcodeVersion"
+
+implementation "com.joooonho:selectableroundedimageview:$roundedImageViewVersion"
+implementation 'com.github.piasy:BigImageViewer:1.5.5'
+implementation 'com.github.piasy:GlideImageLoader:1.5.5'
+implementation "com.jaeger.statusbarutil:library:$statusbarutilVersion"
+implementation "org.fourthline.cling:cling-core:2.1.2"
+implementation "org.fourthline.cling:cling-support:2.1.2"
+implementation "org.eclipse.jetty:jetty-server:8.1.22.v20160922"
+implementation "org.eclipse.jetty:jetty-servlet:8.1.22.v20160922"
+implementation "org.eclipse.jetty:jetty-client:8.1.22.v20160922"
+implementation 'com.github.chrisbanes.photoview:library:1.2.4'
+implementation "com.easemob:kefu-sdk-lite:1.2.2"
+implementation 'me.relex:circleindicator:1.2.2@aar'
+implementation "in.srain.cube:ultra-ptr:$ultraPtrVersion"
+implementation 'com.github.lzyzsd:circleprogress:1.2.1'
+implementation 'com.github.lzyzsd:jsbridge:1.0.4'
+implementation "com.github.lihangleo2:ShadowLayout:$shadowLayoutVersion"
+androidTestImplementation 'org.hamcrest:hamcrest-integration:1.3'
+implementation 'com.parse.bolts:bolts-tasks:1.4.0'
+implementation 'com.sina.weibo.sdk:core:4.2.7:openDefaultRelease@aar'
+implementation "androidx.test.espresso:espresso-core:$xEspressoVersion"
+testImplementation 'org.mockito:mockito-core:1.10.19'
+implementation "com.tencent.bugly:crashreport_upgrade:$buglyCrashReportVersion"
+implementation 'com.ogaclejapan.smarttablayout:library:1.6.1@aar'
+implementation 'com.ogaclejapan.smarttablayout:utils-v4:1.6.1@aar'
+implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.0.5.1'
+
