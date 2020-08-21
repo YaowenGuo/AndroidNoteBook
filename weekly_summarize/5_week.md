@@ -157,10 +157,65 @@ Retrofit.Builder builder = new Retrofit.Builder()
 
 
 
-
-
-
 ##  网络请求错误处理
+
+### 存在的问题
+
+1. Exception 类型太多，处理不清楚用哪一个，每个人，每个包里都要自己独特的写法。
+
+仅 Http 请求结果的 Exception 就有（还没看 network 包中的情况）：
+```
+// package com.fenbi.android.retrofit.exception;
+ApiException
+ApiRspContentException
+ApiStatusException
+
+// Retrofit 的异常
+// package retrofit2
+HttpException
+```
+
+network 包中的异常种类更多，没有规律可把握，使用和看代码都很纠结和疑惑。
+
+2. 每个非正常结果的检查都要自己做并抛出异常，模板代码太多，由于项目中定义的异常种类太多，每种写法还不一样。
+
+有的在 Java 的 Observer 中做检测
+
+```Java
+com.fenbi.android.retrofit.observer.ApiObserver 
+
+com.fenbi.android.retrofit.observer.ApiObserverNew {
+    @Override
+    public void onNext(T t) {
+        if (t instanceof Response) {
+            int httpCode = ((Response)t).code();
+            boolean isSucc = httpCode >= 200 && httpCode < 300;
+            if (!isSucc) {
+                onError(new HttpException((Response) t));
+                return;
+            }
+        }
+
+        if (t instanceof  BaseRsp) {
+            BaseRsp baseRsp = (BaseRsp)t;
+
+            if (!baseRsp.isSuccess()) {
+                onError(new ApiRspContentException(baseRsp.getCode(), baseRsp.getMsg()));
+                return;
+            }
+        }
+
+        onSuccess(t);
+        onFinish();
+    }
+}
+
+
+
+```
+
+
+
 
 1. 当网络错误发生的时候，什么时候分发到 onResponse？ 什么时候分发到 onError?
 
@@ -279,3 +334,7 @@ public static final int HTTP_CLIENT_TIMEOUT = 408;
  */
 public static final int HTTP_UNAVAILABLE = 503;
 ```
+
+> 待研究
+
+https://blog.csdn.net/anhenzhufeng/article/details/86677016
