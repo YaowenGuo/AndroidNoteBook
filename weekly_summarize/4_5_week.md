@@ -3,6 +3,8 @@
 
 ## 问题 1： 错误处理
 
+切入点，使用 Single 的时候，发现原有的错误处理复用不了。
+
 ### 现有代码
 
 1. 处理错误的形式多样，理解和使用都很容易迷惑。
@@ -132,47 +134,73 @@ HttpException
 
 ### 网络请求的错误处理
 
-1. 希望自己的错误转台码判断和网络请求框架的 Http 响应码走一套逻辑。
+#### 1. 首先理清现有网络框架的错误处理分支
+
+```
+    
+OkHttp         <----------  失败重连，重定向跟踪。Auth 认证重试
+
+  |
+  |   -------------------┒  
+  |                      |   
+  |                      |
+  |                      |
+ onResponse             onFailure 超时，链接失败，抛出 IOException 等异常。
+ (Response包含非          |
+ 200~300错误)             |
+  |                      |
+  ∨                      ∨
+Retrofit   --------------┨    <--- Retrofit 主要处理请求参数，和返回数据的转换。错误处理没有任何改变。
+  |                      |
+  |                      |
+(Response)               |
+包含200~300错误         跟OkHttp 一样 
+  |                      |
+  ∨                      ∨
+RxJava(AdapterFactory)---┨
+  |                      |
+(200 ~299 正常结果)       增加 非 200~ 299 的错误结果
+  |                      |
+  |                      |
+(ResponseBody)           |
+  |                      |
+  ∨                      ∨ 
+body 里加code 自己处理    错误处理逻辑。
+
+```
+
+
+希望做的的情况
+
+
+1. 希望自己定义的的错误转台码判断和网络请求框架的 Http 响应码走一套逻辑。
 
 2. 能在一处判断，不要有不同的分支
 
 3. 对上层开发者透明，不用因为网络请求错误而单独继承或者调用函数判断。
 
+0. 原有网络请求错误处理代码很多，一时修改不完。希望不影响旧接口，渐进式的过度。
 
-#### 1. 首先理清现有网络框架的错误处理分支
 
 ```
-OkHttp         ---------- 失败重连，重定向跟踪。
-                    超时，链接失败，抛出 IOException 等异常走 `onFailure`。
-                    其他的状态码，只要服务正常返回数据体，都会走 onResponse
-  |
-  |
-  (Response)
-  |
-  ↓ 
-Retrofit     ------------ Response 主要处理请求参数，和返回数据的转换。错误处理没有任何改变。
-  |
-  |
-  (Response)
-  |
-  ↓ 
-RxJavaAdapter ---------- 非 200 ~ 299 的，调用 Observer 的 onError, 但是如果请求的 Type 如果是 Request，就无法正确处理网络请求错误。
-  |
-  |
-  (ResponseBody)
-  |
-  ↓ 
-Convertor       ---------- Json 解析错误
-  |
-  |
-   (Json)
-  |
-  ↓ 
-自己处理      ------------ Body 体里使用状态码。可以自己抛出异常，走 Observer 的 onError.
+OkHttp/Retrofit/RxJava --┒
+  |                      |
+  |                      |
+ onRespons               |
+ onSuccess            onFailure/OnError 
+(只有200~299的正确结果)    |
+  |                      |   
+  |                      |
+  |                      |
+  ∨                      ∨
+渲染逻辑               错误提示。
+
 ```
 
 
-- Retrofit 虽然定义了 HttpException 用于承接错误响应码，但是并不会向外抛出，仅作从错误中恢复和 AdapterFactory 中的适配器向外的错误处理。
+
+
+> Retrofit 虽然定义了 HttpException 用于承接错误响应码，但是并不会向外抛出，仅作从错误中恢复和 AdapterFactory 中的适配器中的错误处理。
 
 
 - 自己处理，现有逻辑。问题上面已经说过。
@@ -185,7 +213,8 @@ Convertor       ---------- Json 解析错误
 
 
 
->  原有网络请求错误处理代码很多，一时修改不完。希望不影响旧接口，渐进式的过度。
+
+
 
 > 1. 添加拦截器
 
@@ -237,6 +266,39 @@ public final class ResponseStatusInterceptor implements Interceptor {
 }
 ```
 2. 将多余的 Exception 使用 `@Deprecated` 标记为废弃，同时添加文档提醒使用新的添加 header 的方式。
+
+
+优化后的流程
+
+```
+    
+OkHttp
+
+  |
+  |
+拦截器拦截错误 ------------┒  
+  |                      |   
+  |                      |
+  |                      |
+（onResponse）          onFailure 超时，链接失败，抛出 IOException 等异常。200~300错误.
+  |                      |
+  ↓                      |
+Retrofit                 |
+  |                      |
+  |                      |
+(Response)   -------- onResponse   可能会增加一些 json 解析错误。
+  |                      |
+  ↓                      |
+RxJava       -------- onError  可能会增加一些 UI 渲染，空指针错误
+  |                      |    
+  |                      |
+  |                      |
+(onNext/onSuccess)       |
+  |                      |
+  |                      |  
+渲染 UI               错误处理逻辑。
+
+```
 
 
 ***留下的问题：必须手动添加请求头，没有找到新定义接口就默认启动新的判断逻辑的方法。***
@@ -291,9 +353,9 @@ private <T> T createApi(final Retrofit retrofit, final Class<T> service) {
 }
 ```
 
-代码潜逃了两层动态代理，看代码很疑惑。就想能不能使用其他方式来加这个线程调度的代码。
+代码嵌套了两层动态代理，看代码很疑惑。就想能不能使用其它方式来加这个线程调度的代码。
 
-- 首先想到了 `AdapterFactory`， 因为 Retrofit 提供的适配器就又默认可以调度到后台线程的代码 `RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io())`。既然能设置后台线程，就能设置返回结果的观察者的线程。看代码.... 发现是 final 的，继承显然不可能了，Copy 修改一份，代码冗余。不能及时升级库使用新特性或者 bug 修复。
+- 首先想到了继承 `AdapterFactory`， 因为 Retrofit 提供的适配器就又默认可以调度到后台线程的代码 `RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io())`。既然能设置后台线程，就能设置返回结果的观察者的线程。看代码.... 发现是 final 的，继承显然不可能了，Copy 修改一份，代码冗余。不能及时升级库使用新特性或者 bug 修复。
 
 - 想到了 `addCallAdapterFactory`, `addXXX` 不就意味着可以添加多个吗？例如 `RecycleView.addItemDecoration`、`OkHpptBuiler.addInterceptor`。
 
