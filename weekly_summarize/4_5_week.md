@@ -136,28 +136,26 @@ HttpException
 
 #### 1. 首先理清现有网络框架的错误处理分支
 
-```
-    
+``` 
 OkHttp         <----------  失败重连，重定向跟踪。Auth 认证重试
-
   |
-  |   -------------------┒  
+  |   -------------------┐  
   |                      |   
   |                      |
   |                      |
- onResponse             onFailure 超时，链接失败，抛出 IOException 等异常。
+ onResponse             onFailure 超时，链接失败，抛出 IOException 等异常。      |
  (Response包含非          |
  200~300错误)             |
   |                      |
   ∨                      ∨
-Retrofit   --------------┨    <--- Retrofit 主要处理请求参数，和返回数据的转换。错误处理没有任何改变。
+Retrofit   --------------┤    <--- Retrofit 主要处理请求参数，和返回数据的转换。错误处理没有任何改变。
   |                      |
   |                      |
 (Response)               |
 包含200~300错误         跟OkHttp 一样 
   |                      |
   ∨                      ∨
-RxJava(AdapterFactory)---┨
+RxJava(AdapterFactory)---┤
   |                      |
 (200 ~299 正常结果)       增加 非 200~ 299 的错误结果
   |                      |
@@ -166,9 +164,7 @@ RxJava(AdapterFactory)---┨
   |                      |
   ∨                      ∨ 
 body 里加code 自己处理    错误处理逻辑。
-
 ```
-
 
 希望做的的情况
 
@@ -183,21 +179,18 @@ body 里加code 自己处理    错误处理逻辑。
 
 
 ```
-OkHttp/Retrofit/RxJava --┒
-  |                      |
+    OkHttp/Retrofit/RxJava
+             |
+  ┌------判断响应码--------┐
   |                      |
  onRespons               |
  onSuccess            onFailure/OnError 
 (只有200~299的正确结果)    |
   |                      |   
   |                      |
-  |                      |
   ∨                      ∨
 渲染逻辑               错误提示。
-
 ```
-
-
 
 
 > Retrofit 虽然定义了 HttpException 用于承接错误响应码，但是并不会向外抛出，仅作从错误中恢复和 AdapterFactory 中的适配器中的错误处理。
@@ -271,7 +264,6 @@ public final class ResponseStatusInterceptor implements Interceptor {
 优化后的流程
 
 ```
-    
 OkHttp
 
   |
@@ -297,7 +289,6 @@ RxJava       -------- onError  可能会增加一些 UI 渲染，空指针错误
   |                      |
   |                      |  
 渲染 UI               错误处理逻辑。
-
 ```
 
 
