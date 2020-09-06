@@ -38,7 +38,6 @@ public void onNext(T t) {
     onSuccess(t);
     onFinish();
 }
-
 ```
 - RxJava 的五种观察者没有公共的观察者基类。当使用其他观察者如 `Single`, `Maybe` 等的时候，就不继承该基类。
     造成的结果就是：
