@@ -6,6 +6,9 @@
     * [Property Animation](ui/animation/property_animation.md)
 * Structure
 * Data
+  * Local
+    * [File](data/local/README.md)
+  * Remove
 * Activity
   * [Activity](./activity/activity.md)
   * [Intent](./activity/intent.md)

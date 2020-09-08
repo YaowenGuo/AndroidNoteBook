@@ -222,7 +222,7 @@ OkHttp3中有一个Cache类是用来定义缓存的，此类详细介绍了几�
 且当sd卡空间小于data可用空间时,使用data目录。
 
 最后来一张图看懂Android内存结构,参考：Android文件存储使用参考 - liaohuqiu
-
+```
  /**
      * |   ($rootDir)
      * +- /data                    -> Environment.getDataDirectory()
@@ -279,7 +279,7 @@ OkHttp3中有一个Cache类是用来定义缓存的，此类详细介绍了几�
      * Context.getDir: /data/data/$packageName/app_dir1
      * </code>
      */
-
+```
 缓存第一种类型
 
 配置单个请求的@Headers，设置此请求的缓存策略,不影响其他请求的缓存策略,不设置则没有缓存。
@@ -292,7 +292,7 @@ Call<List<Widget>> widgetList();
 缓存第二种类型
 
 有网和没网都先读缓存，统一缓存策略，降低服务器压力。
-
+```
 private Interceptor cacheInterceptor() {
       Interceptor cacheInterceptor = new Interceptor() {
             @Override
@@ -311,12 +311,12 @@ private Interceptor cacheInterceptor() {
             }
         };
       }
-
+```
 此中方式的缓存Interceptor实现：ForceCachedInterceptor.java
 缓存第三种类型
 
 结合前两种，离线读取本地缓存，在线获取最新数据(读取单个请求的请求头，亦可统一设置)。
-
+```
 private Interceptor cacheInterceptor() {
         return new Interceptor() {
             @Override
@@ -352,21 +352,21 @@ private Interceptor cacheInterceptor() {
             }
         };
     }
-
+```
 此中方式的缓存Interceptor实现：OfflineCacheControlInterceptor.java
 错误处理
 
 在请求网络的时候,我们不止会得到HttpException,还有我们和服务器约定的errorCode和errorMessage,为了统一处理,我们可以
 预处理以下上面两个字段,定义BaseModel,在ConverterFactory中进行处理,
 可参照:
-
+```
     Retrofit+RxJava实战日志(3)-网络异常处理
     retrofit-2-simple-error-handling
-
+```
 网络状态监听
 
 一般在没有网络的时候使用缓存数据,有网络的时候及时重试获取最新数据,其中获取是否有网络，我们采用广播的形式：
-
+```
  public class NetWorkReceiver extends BroadcastReceiver {
 
      @Override
@@ -374,9 +374,9 @@ private Interceptor cacheInterceptor() {
          HttpNetUtil.INSTANCE.setConnected(context);
      }
  }
-
+```
 HttpNetUtil实时获取网络连接状态,关键代码
-
+```
    /**
      * 获取是否连接
      */
@@ -420,12 +420,12 @@ HttpNetUtil实时获取网络连接状态,关键代码
         }
 
     }
-
+```
 在需要监听网络的界面或者base(需要判断当前activity是否在栈顶)实现Networkreceiver。
 Retrofit封装
 
 全局单利的OkHttpClient：
-
+```
 okHttp() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -452,9 +452,9 @@ okHttp() {
 
         ;
     }
-
+```
 全局单利的Retrofit.Builder,这里返回builder是为了方便我们设置baseUrl的,我们可以动态创建多个api接口,当然也可以用@Url注解
-
+```
 Retrofit2Client() {
         retrofitBuilder = new Retrofit.Builder()
                 //设置OKHttpClient
@@ -470,3 +470,4 @@ Retrofit2Client() {
                 .addConverterFactory(GsonConverterFactory.create())
         ;
     }
+```
