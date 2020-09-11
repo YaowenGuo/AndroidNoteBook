@@ -74,6 +74,7 @@ CCD的优势在于成像质量好，但是制造工艺复杂，成本高昂，�
 
 
 - [Ffmpeg](ffmpeg/README.md)
+- [录屏](https://www.jianshu.com/p/8b313692ac85)
 
 
 
