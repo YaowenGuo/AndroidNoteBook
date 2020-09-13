@@ -104,10 +104,19 @@ CameraDevice 类是连接到 Android 设备的单个摄像头的表示，允许�
 
 对摄像头的链接，可以用于发送 Capture 用于操作摄像机。
 
+## 输出格式
+
+Camera2 开始默认支持 YUV 图像格式。此外还有 RAW 和 JPEG。对于YUV格式输出,视频/图像都推荐YUV_420_888
+
 参考 
 https://www.jianshu.com/p/9a2e66916fcb
 https://blog.csdn.net/sjy0118/article/details/78748941
 https://blog.csdn.net/afei__/article/details/85960343
 https://www.jianshu.com/p/1e82021b10b4
+https://www.jianshu.com/p/23e8789fbc10
+
+底层
+
+https://www.cnblogs.com/blogs-of-lxl/p/10651611.html
 
 
