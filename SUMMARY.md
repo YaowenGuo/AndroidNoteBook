@@ -119,8 +119,9 @@
   * [Camera2 Overview](media/camera2_overview.md)
   * [Android Camera2](media/camera2_api.md)
   * [Color model](media/color_model.md)
-
   * [OpenGL ES](media/opengl/README.md)
+  * [ffmpeg](media/ffmpeg/README.md)
+  * [OpenCV](media/open_cv/README.md)
 
 
 
