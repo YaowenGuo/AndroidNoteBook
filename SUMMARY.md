@@ -123,6 +123,8 @@
   * [ffmpeg](media/ffmpeg/README.md)
   * [OpenCV](media/open_cv/README.md)
 
+* [Gradle](gradle/README.md)
+  * [commend](gradle/commend.md)
 
 
 * Library desigin principle
