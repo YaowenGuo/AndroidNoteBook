@@ -192,3 +192,10 @@ https://blog.csdn.net/u012854870/article/details/84984066
 使用 getLayoutPosition 代替
 
 https://www.jianshu.com/p/17080a269dfe
+
+
+### RecyclerView 消耗点击事件
+
+点击
+
+recyclerView.setLayoutFrozen(true)

@@ -44,5 +44,6 @@ android:theme="@style/AppTheme.NoActionBar">
 - Scroll
 
 The app:layout_behavior for the ConstraintLayout is set to @string/appbar_scrolling_view_behavior, which controls how the screen scrolls in relation to the app bar at the top. (This string resource is defined in a generated file called values.xml, which you should not edit.)
+
 ```
 ```

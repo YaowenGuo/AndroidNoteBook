@@ -170,7 +170,7 @@ Tool Bar 中PopupTheme属性是用来控制弹出菜单的样式的
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <!-- theme UI controls like checkboxes and text fields -->
         <item name="colorAccent">@color/accent</item>
-        <!--除了沉浸模式，禁止使用透明度来设置带浅灰色的状态栏，这会是状态栏覆盖 TopBar, 需要单独设置 AppBar-->
+        <!--除了沉浸模式，禁止使用透明度来设置带浅灰色的状态栏，这会导致状态栏覆盖 TopBar, 需要单独设置 AppBar-->
         <!--到屏幕顶部的距离才能弥补。非常繁琐。-->
         <item name="android:windowTranslucentStatus">true</item>
         <!--禁止使用，会使虚拟按键也变成透明，覆盖屏幕底部一部分 View，除非确认修复了引起的问题-->
