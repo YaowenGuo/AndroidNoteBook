@@ -123,6 +123,7 @@
   * [ffmpeg](media/ffmpeg/README.md)
   * [OpenCV](media/open_cv/README.md)
   * [WebRTC](media/web_rtc/README.md)
+    * [Android demo](media/web_rtc/client_demo.md)
 
 * [Gradle](gradle/README.md)
   * [commend](gradle/commend.md)
