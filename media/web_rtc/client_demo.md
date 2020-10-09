@@ -27,6 +27,18 @@ Errors:
 export DEPOT_TOOLS_UPDATE=0
 ```
 
+3. 
+
+```
+Failed to install chromium/third_party/turbine:O_jNDJ4VdwYKBSDbd2BJ3mknaTFoVkvE7Po8XIiKy8sC - prpc: when sending request: Post "https://chrome-infra-packages.appspot.com/prpc/cipd.Repository/GetInstanceURL": x509: certificate is valid for *.facebook.com, *.facebook.net, *.fbcdn.net, *.fbsbx.com, *.m.facebook.com, *.messenger.com, *.xx.fbc
+```
+
+应该是代理问题，检查代理访问是否正常使用，然后设置
+
+```
+export http_proxy=http://127.0.0.1:1087
+export https_proxy=http://127.0.0.1:1087
+```
 
 
 
