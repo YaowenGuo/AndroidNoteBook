@@ -86,7 +86,7 @@ External library support: 扩展库
 - 编译器：
     - NDK17 开始，`make_standalone_toolchain.py` 用于替换之前的 `make-standalone-toolchain.sh` 用于在 windows 不用配置 bash 环境也能编译，但是实际情况是许多使用 `Autoconf` 配置编译的三方库仍旧无法在 Windows 上编译。 
 
-    - 从 NDK 19 开始，NDK 中默认带有 `toolchains` 可供使用，与任意构建系统进行交互时不再需要使用 make_standalone_toolchain.py 脚本。如果是 NDK 19 之前的版本，请查看 [NDK 18 及之前编译](https://developer.android.com/ndk/guides/standalone_toolchain)。
+    - 从 NDK 19 开始，NDK 中默认带有 `toolchains` 可供使用，与任意构建系统进行交互时不再需要使用 `make_standalone_toolchain.py` 脚本。如果是 NDK 19 之前的版本，请查看 [NDK 18 及之前编译](https://developer.android.com/ndk/guides/standalone_toolchain)。
     
     - NDK 17 开始默认使用 clang 作为编译器， NDK18 删除了 gcc, 只提供了 clang 的编译器。
 
@@ -107,179 +107,21 @@ https://blog.csdn.net/yu540135101/article/details/105183294/
 
 ### 编译 x264
 
-创建 `.sh` 结尾的脚本文件，添加执行权限。
+创建 `.sh` 结尾的脚本文件, 如`make_x264.sh`，添加执行权限。 脚本中已经内置了下载 x264 方式，但是要确保 git 命令可用。
 
-```shell
-#!/bin/sh
+[查看 make_x264.sh](make_x264.sh)
 
-NDK=$NDK_HOME
+遗留问题：x86 平台编译不成功，会导致 ffmpeg 的对应版本也无法编译 x86 版本。不影响使用，因为该版本主要用于虚拟机。错误信息:
 
-# NDK 编译环境，不同 OS 上要下载不同的 NDK，而这个文件夹是不同的。需要根据下载的 NDK 是运行在 Linux, Mac OS, Windows 上而配置不同的文件夹。
-HOST_TAG=darwin-x86_64
-
-TARGET=armv7a-linux-androideabi
-TARGET_AL=arm-linux-androideabi
-# export TARGET=aarch64-linux-android
-# export TARGET=i686-linux-android
-# export TARGET=x86_64-linux-android
-
-# Set this to your minSdkVersion.
-# 支持的最次版本
-export API=16
-
-export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
-
-# Configure and build.
-export AR=$TOOLCHAIN/bin/$TARGET_AL-ar
-export AS=$TOOLCHAIN/bin/$TARGET_AL-as
-export CC=$TOOLCHAIN/bin/$TARGET$API-clang
-export CXX=$TOOLCHAIN/bin/$TARGET$API-clang++
-export LD=$TOOLCHAIN/bin/$TARGET_AL-ld
-export RANLIB=$TOOLCHAIN/bin/$TARGET_AL-ranlib
-export STRIP=$TOOLCHAIN/bin/$TARGET_AL-strip
-echo $CC
-echo $CXX
-
-# 该库使用到 arm-linux-androideabi-strings，可以通过在环境变量里添加查找路径让其能够找到命令。
-PATH=$TOOLCHAIN/bin:$PATH
-
-
-# 不使用 $NDK_HOME 下的 /sysroot/
-SYSROOT=$TOOLCHAIN/sysroot/
-# 可以不设置，但是设置必须是对应架构的，例如 arm-linux-androideabi-
-CROSS_PREFIX=arm-linux-androideabi-
-
-INSTALL_DIR=$(pwd)/x264-$TARGET
-
-configure="--disable-cli \
-           --enable-static \
-           --enable-shared \
-           --disable-opencl \
-           --enable-strip \
-           --disable-cli \
-           --disable-win32thread \
-           --disable-avs \
-           --disable-swscale \
-           --disable-lavf \
-           --disable-ffms \
-           --disable-gpac \
-           --disable-lsmash"
-
-extra_configure="--disable-asm"
-
-#优化编译项
-extra_cflags="-march=armv7-a -mfloat-abi=softfp -mfpu=neon -mthumb -D__ANDROID__ -D__ARM_ARCH_7__ -D__ARM_ARCH_7A__ -D__ARM_ARCH_7R__ -D__ARM_ARCH_7M__ -D__ARM_ARCH_7S__"
-extra_ldflags="-nostdlib -lc"
-
-cd ./x264
-
-./configure    ${extra_configure} \
-    --prefix=$INSTALL_DIR \
-    --cross-prefix=$CROSS_PREFIX \
-    --sysroot=$SYSROOT \
-    --extra-cflags="${extra_cflags}" \
-    --host=$TARGET_AL
-# --host 指定成 armv7a-linux-androideabi 和 arm-linux-androideabi 都不出问题，应该是不设置也行。具体什么目录有关还没搞清楚。
-
-# this link flage whill cause linker error.
-#    --extra-ldflags="$extra_ldflags" \
-make clean
-make -j4
-make install
+```
+/base.o: relocation R_386_GOTOFF against preemptible symbol x264_log_default cannot be used when making a shared object
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
 编译 ffmpeg
 
-```bash
-#!/bin/bash
+[查看 make_x264.sh](make_ffmpeg.sh)
 
-#!/bin/bash
-export NDK=<ndk path>
-# 当前系统
-export HOST_TAG=linux-x86_64
-# 支持的 Android CUP 架构
-# export ARCH=aarch64
-# export CPU=armv8-a
-export ARCH=armv7a
-export CPU=armv7-a
-# 支持的 Android 最低系统版本
-export MIN=21
-export ANDROID_NDK_PLATFORM=android-21
-
-export PREFIX=$(pwd)/android/$CPU
-
-export MIN_PLATFORM=$NDK/platforms/android-$MIN
-export SYSROOT=$NDK/sysroot
-export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
-export AR=$TOOLCHAIN/bin/arm-linux-androideabi-ar
-export AS=$TOOLCHAIN/bin/arm-linux-androideabi-as
-export CC=$TOOLCHAIN/bin/$ARCH-linux-androideabi$MIN-clang
-echo "-----------------------------"
-echo $CC
-export CXX=$TOOLCHAIN/bin/$ARCH-linux-androideabi$MIN-clang++
-export LD=$TOOLCHAIN/bin/arm-linux-androideabi-ld
-export NM=$TOOLCHAIN/bin/arm-linux-androideabi-nm
-export RANLIB=$TOOLCHAIN/bin/arm-linux-androideabi-ranlib
-export STRIP=$TOOLCHAIN/bin/arm-linux-androideabi-strip
-
-OPTIMIZE_CFLAGS="-I/home/albert/ffmpeg/x264-master/android/arm/include -DANDROID -I$NDK/sysroot/usr/include/arm-linux-androideabi/"
-ADDI_LDFLAGS="-Wl,-rpath-link=$MIN_PLATFORM/arch-arm/usr/lib -L/home/albert/ffmpeg/x264-master/android/arm/lib -L$MIN_PLATFORM/arch-arm/usr/lib -nostdlib"
-
-sed  -i "" "s/SLIBNAME_WITH_MAJOR='\$(SLIBNAME).\$(LIBMAJOR)'/SLIBNAME_WITH_MAJOR='\$(SLIBPREF)\$(FULLNAME)-\$(LIBMAJOR)\$(SLIBSUF)'/" configure
-sed  -i "" "s/LIB_INSTALL_EXTRA_CMD='\$\$(RANLIB) \"\$(LIBDIR)\\/\$(LIBNAME)\"'/LIB_INSTALL_EXTRA_CMD='\$\$(RANLIB) \"\$(LIBDIR)\\/\$(LIBNAME)\"'/" configure
-sed  -i "" "s/SLIB_INSTALL_NAME='\$(SLIBNAME_WITH_VERSION)'/SLIB_INSTALL_NAME='\$(SLIBNAME_WITH_MAJOR)'/" configure
-sed  -i "" "s/SLIB_INSTALL_LINKS='\$(SLIBNAME_WITH_MAJOR) \$(SLIBNAME)'/SLIB_INSTALL_LINKS='\$(SLIBNAME)'/" configure
-sed -i -e 's/#define getenv(x) NULL/\/\*#define getenv(x) NULL\*\//g' config.h
-# sed  -i "" "s/SHFLAGS='-shared -Wl,-soname,\$(SLIBNAME)'/SHFLAGS='-shared -soname \$(SLIBNAME)'/" configure
-# sed  -i "" "s/-Wl//g" configure
-
-./configure \
---prefix=$PREFIX \
---ar=$AR \
---as=$AS \
---cc=$CC \
---cxx=$CXX \
---nm=$NM \
---ranlib=$RANLIB \
---strip=$STRIP \
---arch=$ARCH \
---target-os=android \
---enable-cross-compile \
---disable-asm \
---enable-gpl \
---enable-libx264 \
---enable-encoder=libx264 \
---enable-jni \
---enable-neon \
---enable-mediacodec \
---enable-shared \
---disable-static \
---disable-ffprobe \
---disable-ffplay \
---disable-ffmpeg \
---disable-debug \
---disable-symver \
---disable-stripping \
---extra-cflags="-I/home/albert/ffmpeg/x264-master/android/arm/include" \
---extra-ldflags="-L/home/albert/ffmpeg/x264-master/android/arm/lib" \
-
-sed  -i "" "s/#define HAVE_TRUNC 0/#define HAVE_TRUNC 1/" config.h
-sed  -i "" "s/#define HAVE_TRUNCF 0/#define HAVE_TRUNCF 1/" config.h
-sed  -i "" "s/#define HAVE_RINT 0/#define HAVE_RINT 1/" config.h
-sed  -i "" "s/#define HAVE_LRINT 0/#define HAVE_LRINT 1/" config.h
-sed  -i "" "s/#define HAVE_LRINTF 0/#define HAVE_LRINTF 1/" config.h
-sed  -i "" "s/#define HAVE_ROUND 0/#define HAVE_ROUND 1/" config.h
-sed  -i "" "s/#define HAVE_ROUNDF 0/#define HAVE_ROUNDF 1/" config.h
-sed  -i "" "s/#define HAVE_CBRT 0/#define HAVE_CBRT 1/" config.h
-sed  -i "" "s/#define HAVE_CBRTF 0/#define HAVE_CBRTF 1/" config.h
-sed  -i "" "s/#define HAVE_COPYSIGN 0/#define HAVE_COPYSIGN 1/" config.h
-sed  -i "" "s/#define HAVE_ERF 0/#define HAVE_ERF 1/" config.h
-sed  -i "" "s/#define HAVE_HYPOT 0/#define HAVE_HYPOT 1/" config.h
-sed  -i "" "s/#define HAVE_ISNAN 0/#define HAVE_ISNAN 1/" config.h
-sed  -i "" "s/#define HAVE_ISFINITE 0/#define HAVE_ISFINITE 1/" config.h
-sed  -i "" "s/#define HAVE_INET_ATON 0/#define HAVE_INET_ATON 1/" config.h
-sed  -i "" "s/#define getenv(x) NULL/\\/\\/ #define getenv(x) NULL/" config.h
-```
 
 
 ## 集成到 Android Studio

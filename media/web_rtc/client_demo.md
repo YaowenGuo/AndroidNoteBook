@@ -9,6 +9,8 @@
 
 [详细的安装文档](https://webrtc.googlesource.com/src/+/refs/heads/master/docs/native-code/android/index.md)
 
+根据文档里的步骤，可以生成一个 gradle 的安卓客户端的 demo 项目，可以拷贝到 Mac 等系统上，使用 Android Studio 导入查看。
+
 这里做一些遇到问题的补充。
 
 1. 由于是 google 的东西，还是需要代理才能访问。
@@ -35,10 +37,36 @@ Failed to install chromium/third_party/turbine:O_jNDJ4VdwYKBSDbd2BJ3mknaTFoVkvE7
 
 应该是代理问题，检查代理访问是否正常使用，然后设置
 
-```
+```shell
+# 将端口号改为你自己的代理端口
 export http_proxy=http://127.0.0.1:1087
 export https_proxy=http://127.0.0.1:1087
 ```
+
+4. tar 包解压问题
+
+```
+nstalling Debian sid amd64 root image: /opt/webrtc/linux_android/src/build/linux/debian_sid_amd64-sysroot
+Downloading https://commondatastorage.googleapis.com/chrome-linux-sysroot/toolchain/5f64b417e1018dcf8fcc81dc2714e0f264b9b911/debian_sid_amd64_sysroot.tar.xz
+tar: ./lib/x86_64-linux-gnu/libexpat.so.1: Cannot utime: No such file or directory
+tar: ./lib/x86_64-linux-gnu/libutil.so.1: Cannot utime: No such file or directory
+tar: ./lib/x86_64-linux-gnu/libcap.so.2: Cannot utime: No such file or directory
+tar: ./lib/x86_64-linux-gnu/libpthread.so.0: Cannot utime: No such file or directory
+...
+```
+如果你在是在 Mac 的 docker 中下载，并且下载目录是挂载在 mac 的目录中，那这个方法可能适合你。这个错误应该是文件系统导致的，有两种方法解决：
+
+方法 1: 只需要下载到 docker 内部的文件目录里就行了。
+方法 2: 在 mac 主机中执行响应的指令，例如 `python2 src/build/linux/sysroot_scripts/install-sysroot.py --arch=amd64`
+
+linux 使用的是 ext 文件系统，跟 mac 不一致。很奇怪的是，我单独执行 tar 命令解压或者单独执行以下的 Python 脚本都不会出问题。很可能是 `src/build/linux/sysroot_scripts/install-sysroot.py` 脚本环境有问题。
+
+```python
+import subprocess
+subprocess.check_call(['tar', 'xf', u'/opt/webrtc/linux_android/src/build/linux/debian_sid_amd64-sysroot/debian_sid_amd64_sysroot.tar.xz', '-C',  u'/opt/webrtc/linux_android/src/build/linux/debian_sid_amd64-sysroot'])
+```
+
+
 
 
 
