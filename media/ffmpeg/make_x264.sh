@@ -13,9 +13,9 @@ dir=$(pwd)
 cd ./x264
 
 extra_configure="--disable-asm"
-extra_ldflags="-v"
+extra_ldflags="-nostdlib -c"
 
-for((i=2; i<3; i++))
+for((i=0; i<size; i++))
 do
     configEnv ${targets[i]} ${compiler[i]} ${CPUS[i]} ${ARCHS[i]} "${extra_cflags_arr[i]}"
     BUILD_DIR=$dir/x264_build/$CPU
@@ -50,10 +50,17 @@ do
         --prefix=$BUILD_DIR \
         --cross-prefix=$CROSS_PREFIX \
         --sysroot=$SYSROOT \
-        --extra-cflags="${extra_cflags}" \
-        --extra-ldflags="$extra_ldflags" \
         --host=$TARGET_AL
-    # this link flage whill cause linker error.
+        --cc=$CC \
+        --cxx=$CXX \
+        --extra-cflags="${extra_cflags}" \
+        --extra-ldflags="${extra_ldflags}" \
+        --ar=$AR \
+        --as=$AS \
+        --nm=$NM \
+        --ranlib=$RANLIB \
+        --strip=$STRIP
+        
 
     # --host 指定成 armv7a-linux-androideabi 和 arm-linux-androideabi 都不出问题，用于指定运行目标的系统。
 
