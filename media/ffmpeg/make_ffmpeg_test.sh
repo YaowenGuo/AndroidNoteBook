@@ -114,7 +114,7 @@ PREFIX=$dir/ffmpeg_build_test/$CPU
 OPTIMIZE_CFLAGS="-Os -fpic -march=$CPU"
 
 cd ./ffmpeg
-build_android
+# build_android
 
 #armv7-a
 ARCH=arm
@@ -131,7 +131,6 @@ export RANLIB=$TOOLCHAIN/bin/arm-linux-androideabi-ranlib
 export STRIP=$TOOLCHAIN/bin/arm-linux-androideabi-strip
 CROSS_PREFIX=$TOOLCHAIN/bin/arm-linux-androideabi-
 PREFIX=$dir/ffmpeg_build_test/$CPU
-echo $CC
 OPTIMIZE_CFLAGS="-Os -fpic -mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU "
 
-# build_android
+build_android

@@ -189,8 +189,8 @@ fftools/ffmpeg.o:ffmpeg.c:function process_input_packet: error: undefined refere
 fftools/ffmpeg.o:ffmpeg.c:function process_input_packet: error: undefined reference to '__aeabi_ldivmod'
 ```
 
-
-
+应该是额外的链接参数引起的 `extra_ldflags="-nostdlib -lc"` 并且设置了 `--as=$AS` 但是提示 `GNU assembler not found`。禁用汇编优化就好了 `--disable-asm`。
+ 
 ## 集成到 Android Studio
 
 新建一个 Module，选择 Android Library。 然后在新建文件，也可以从新建的 JNI 项目中拷贝过来。

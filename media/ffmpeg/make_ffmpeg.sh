@@ -14,64 +14,74 @@ x264_lib=$dir/x264_build
 
 cd ./ffmpeg
 
-extra_ldflags="-nostdlib -lc"
+# extra_ldflags="-nostdlib -lc"
 
-for((i=0; i<size; i++))
+for((i=2; i<3; i++))
 do
-    configEnv ${targets[i]} ${compiler[i]} ${CPUS[i]} ${ARCHS[i]} ${extra_cflags_arr[i]}
+    configEnv ${targets[i]} ${compiler[i]} ${CPUS[i]} ${ARCHS[i]} "${extra_cflags_arr[i]}"
 
     BUILD_DIR=$dir/ffmpeg_build/$CPU
+    rm -rf $BUILD_DIR
 
     extra_include="-I${x264_lib}/${CPU}/include"
     extra_lib="-L${x264_lib}/${CPU}/lib"
 
-    extra_cflags="-Os -fpic ${extra_cflags} ${extra_include}"
-    extra_ldflags="${extra_ldflags} ${extra_lib}"
+    extra_cflags="-Os -fpic ${extra_cflags} "
+    # extra_cflags="-Os -fpic ${extra_cflags} ${extra_include}"
+    # extra_ldflags="${extra_ldflags} ${extra_lib}"
 
-    echo "extra_configure: ${extra_configure}"
-    echo "BUILD_DIR: ${BUILD_DIR}"
+    echo "PREFIX: ${BUILD_DIR}"
     echo "CROSS_PREFIX: ${CROSS_PREFIX}"
     echo "SYSROOT: ${SYSROOT}"
-    echo "extra_cflags: ${extra_cflags}"
-    echo "TARGET_AL: ${TARGET_AL}"
+    echo "ARCH: ${ARCH}"
+    echo "CPU: ${CPU}"
+    echo "CC: ${CC}"
+    echo "CXX: ${CXX}"
+    echo "OPTIMIZE_CFLAGS: ${extra_cflags}"
+    echo "ADDI_LDFLAGS: ${extra_ldflags}"
+    echo "AR: ${AR}"
+    echo "AS: ${AS}"
+    echo "NM: ${NM}"
+    echo "RANLIB: ${RANLIB}"
+    echo "STRIP: ${STRIP}"
 
-
-    ./configure \
-    --prefix=$BUILD_DIR \
+    ./configure --prefix=$BUILD_DIR \
     --cross-prefix=$CROSS_PREFIX \
     --sysroot=$SYSROOT \
     --arch=$ARCH \
+    --cc=$CC \
+    --cxx=$CXX \
     --extra-cflags="${extra_cflags}" \
     --extra-ldflags="${extra_ldflags}" \
     --ar=$AR \
     --as=$AS \
-    --cc=$CC \
-    --cxx=$CXX \
     --nm=$NM \
     --ranlib=$RANLIB \
     --strip=$STRIP \
     --target-os=android \
     --enable-cross-compile \
-    --disable-asm \
     --enable-gpl \
-    --enable-libx264 \
-    --enable-encoder=libx264 \
+    --enable-mediacodec \
+    --enable-decoder=h264_mediacodec \
     --enable-jni \
     --enable-neon \
-    --enable-mediacodec \
     --enable-shared \
+    --enable-small \
     --disable-static \
     --disable-ffprobe \
     --disable-ffplay \
-    --disable-ffmpeg \
     --disable-debug \
+    --disable-asm \
+    --disable-avdevice \
+    --disable-doc \
     --disable-symver \
+    --enable-hwaccels  \
+    --enable-postproc \
     --disable-stripping \
-    
+    --enable-ffmpeg
 
-    # --extra-cflags="-I /home/albert/ffmpeg/x264-master/android/arm/include" \
-    # --extra-ldflags="-L/home/albert/ffmpeg/x264-master/android/arm/lib" \
-
+    #  --enable-ffmpeg  这个没有实际使用，但是可以在编译的过程中验证链接是否有问题，如果不加这个，只有到安卓应用的 `.so` 库运行的时候才能发现以下错误。 
+   
     make clean
     make -j4
     make install

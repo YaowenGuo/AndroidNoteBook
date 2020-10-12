@@ -116,14 +116,20 @@
   * [function](kotlin/function.md)
   * [Coroutine](kotlin/coroutine/README.md)
 * [MultiMedia](media/README.md)
-  * [Camera2 Overview](media/camera2_overview.md)
-  * [Android Camera2](media/camera2_api.md)
-  * [Color model](media/color_model.md)
-  * [OpenGL ES](media/opengl/README.md)
-  * [ffmpeg](media/ffmpeg/README.md)
-  * [OpenCV](media/open_cv/README.md)
-  * [WebRTC](media/web_rtc/README.md)
-    * [Android demo](media/web_rtc/client_demo.md)
+  * [采样](media/capture.md)
+    * [Camera2 Overview](media/camera2_overview.md)
+    * [Android Camera2](media/camera2_api.md)
+    * [Color model](media/color_model.md)
+  * 编码/解码、封装/解封装、编辑、处理
+    * [ffmpeg](media/ffmpeg/README.md)
+    * [OpenCV](media/open_cv/README.md)
+    * [OpenGL ES](media/opengl/README.md)
+  * 传输、链接
+    * [WebRTC](media/web_rtc/README.md)
+      * [Android demo](media/web_rtc/client_demo.md)
+  * 输出
+    * [MediaPlayer]
+    * [ExoPlayer]
 
 * [Gradle](gradle/README.md)
   * [commend](gradle/commend.md)
