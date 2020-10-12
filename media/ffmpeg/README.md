@@ -120,7 +120,74 @@ clang: error: linker command failed with exit code 1 (use -v to see invocation)
 
 编译 ffmpeg
 
-[查看 make_x264.sh](make_ffmpeg.sh)
+[查看 make_ffmpeg.sh](make_ffmpeg.sh)
+
+#### 问题处理
+
+```
+toolchains/llvm/prebuilt/darwin-x86_64/bin/armv7a-linux-androideabi16-clang is unable to create an executable file.
+C compiler test failed.
+```
+
+`confiure` 指令要指定 `--cpu=` 参数，并且要严格按照下面的字符串对应，例如，不能将 `armv7-a` 写成 `armabiv7-a`
+
+```
+CPUS=(
+    armv7-a
+    arm64-v8a
+    x86
+    x86_64
+)
+```
+
+> GNU assembler not found
+
+```
+GNU assembler not found, install/update gas-preprocessor
+
+If you think configure made a mistake, make sure you are using the latest
+version from Git.  If the latest version fails, report the problem to the
+ffmpeg-user@ffmpeg.org mailing list or IRC #ffmpeg on irc.freenode.net.
+Include the log file "ffbuild/config.log" produced by configure as this will help
+solve the problem.
+```
+
+这是是 `--as=$AS` 参数引起的问题，应该是调用了系统的汇编程序，但是没找到，安装一下就好了。或者给 `./configure` 添加 `--disable-asm` 参数禁用汇编优化。
+
+> error: undefined reference to
+
+```
+libavfilter/libavfilter.so: error: undefined reference to '__aeabi_idivmod'
+libavfilter/libavfilter.so: error: undefined reference to '__aeabi_d2ulz'
+libavfilter/libavfilter.so: error: undefined reference to '__aeabi_ul2f'
+libavfilter/libavfilter.so: error: undefined reference to '__aeabi_uidivmod'
+libavfilter/libavfilter.so: error: undefined reference to '__aeabi_uidiv'
+libavcodec/libavcodec.so: error: undefined reference to '__aeabi_f2ulz'
+fftools/cmdutils.o:cmdutils.c:function parse_number_or_die: error: undefined reference to '__aeabi_d2lz'
+fftools/cmdutils.o:cmdutils.c:function parse_number_or_die: error: undefined reference to '__aeabi_l2d'
+fftools/cmdutils.o:cmdutils.c:function write_option: error: undefined reference to '__aeabi_d2lz'
+fftools/cmdutils.o:cmdutils.c:function write_option: error: undefined reference to '__aeabi_l2d'
+fftools/cmdutils.o:cmdutils.c:function write_option: error: undefined reference to '__aeabi_d2lz'
+fftools/cmdutils.o:cmdutils.c:function write_option: error: undefined reference to '__aeabi_l2d'
+fftools/cmdutils.o:cmdutils.c:function opt_timelimit: error: undefined reference to '__aeabi_d2lz'
+fftools/cmdutils.o:cmdutils.c:function opt_timelimit: error: undefined reference to '__aeabi_l2d'
+fftools/cmdutils.o:cmdutils.c:function grow_array: error: undefined reference to '__aeabi_idiv'
+fftools/ffmpeg_opt.o:ffmpeg_opt.c:function open_output_file: error: undefined reference to '__aeabi_f2lz'
+fftools/ffmpeg_opt.o:ffmpeg_opt.c:function opt_target: error: undefined reference to '__aeabi_ldivmod'
+fftools/ffmpeg.o:ffmpeg.c:function main: error: undefined reference to '__aeabi_l2f'
+fftools/ffmpeg.o:ffmpeg.c:function main: error: undefined reference to '__aeabi_l2f'
+fftools/ffmpeg.o:ffmpeg.c:function transcode: error: undefined reference to '__aeabi_uldivmod'
+fftools/ffmpeg.o:ffmpeg.c:function transcode: error: undefined reference to '__aeabi_l2f'
+fftools/ffmpeg.o:ffmpeg.c:function transcode: error: undefined reference to '__aeabi_l2f'
+fftools/ffmpeg.o:ffmpeg.c:function print_report: error: undefined reference to '__aeabi_ul2d'
+fftools/ffmpeg.o:ffmpeg.c:function print_report: error: undefined reference to '__aeabi_ul2d'
+fftools/ffmpeg.o:ffmpeg.c:function print_report: error: undefined reference to '__aeabi_ul2d'
+fftools/ffmpeg.o:ffmpeg.c:function print_report: error: undefined reference to '__aeabi_uldivmod'
+fftools/ffmpeg.o:ffmpeg.c:function print_report: error: undefined reference to '__aeabi_ul2d'
+fftools/ffmpeg.o:ffmpeg.c:function process_input_packet: error: undefined reference to '__aeabi_ldivmod'
+fftools/ffmpeg.o:ffmpeg.c:function process_input_packet: error: undefined reference to '__aeabi_ldivmod'
+fftools/ffmpeg.o:ffmpeg.c:function process_input_packet: error: undefined reference to '__aeabi_ldivmod'
+```
 
 
 
