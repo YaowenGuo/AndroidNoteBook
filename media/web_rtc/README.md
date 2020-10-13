@@ -87,11 +87,19 @@ depot_tools 是一个用于和 google 开源库管理平台 Chromium 对接的 g
 
 [安装](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)
 
-## 下载 WebRTC 客户端 Native 代码
+## 下载 WebRTC 客户端 Native 代码 / 各平台实现
 
 通常所说的的 WebRTC 是用于 Web 前端的。想要在 Android、ios、Linux、Windos、MaxOS 系统上直接使用 WebRTC，而不是通过浏览器，则只需要下载 Native 部分。因为调用系统硬件需要平台支持，所以 WebRTC 项目开发的时候将将通用的部分使用 Native 代码，web 上使用的指示对 Native 代码的一层封装而已。
 
 [各个平台 native 链接](https://webrtc.googlesource.com/src/+/refs/heads/master/docs/native-code/index.md)
+
+### 安卓 App
+
+安卓 App 想要使用 webrtc 有两种方式。
+
+1. 使用 JNI 封装 webrtc 的 C++ 部分。 
+
+2. WebRTC 为[安卓实现了一个 Java 包](https://webrtc.github.io/webrtc-org/native-code/android/)，方便安卓使用。既可以是使用已经编译好的，也可以自己打包 arr 包引入。这种方法在[新的官方文档](https://webrtc.googlesource.com/src/+/refs/heads/master/docs/native-code/android/index.md)上没有给出来，不知道是不是不在更新了。
 
 
 ## 服务器端

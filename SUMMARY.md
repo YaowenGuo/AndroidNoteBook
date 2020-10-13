@@ -126,7 +126,9 @@
     * [OpenGL ES](media/opengl/README.md)
   * 传输、链接
     * [WebRTC](media/web_rtc/README.md)
-      * [Android demo](media/web_rtc/client_demo.md)
+      * [generate demo progect](media/web_rtc/client_demo.md)
+      * [Android capture](media/web_rtc/android/1_capture.md)
+
   * 输出
     * [MediaPlayer]
     * [ExoPlayer]

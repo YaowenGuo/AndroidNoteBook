@@ -66,8 +66,23 @@ import subprocess
 subprocess.check_call(['tar', 'xf', u'/opt/webrtc/linux_android/src/build/linux/debian_sid_amd64-sysroot/debian_sid_amd64_sysroot.tar.xz', '-C',  u'/opt/webrtc/linux_android/src/build/linux/debian_sid_amd64-sysroot'])
 ```
 
+5. 运行生成的 Android 包
+
+需要注意的是，生成的是一个 gradle 项目，而不是 Android Studio 项目。应该使用 Android Studio 的 import 的方式，而不是直接打开。另外生成的 demo 项目，依赖引用了项目之外的其他路径的文件。移动目录应该将整个 WebRtc 一起移动，而不是仅移动生成的 demo 目录。
 
 
+6. 解决AndroidStudio编译出现"Could not resolve all files for configuration ':library:_internal_aapt2_binary'"
+
+再项目Gradle的allprojects中添加google()：
+
+```
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+```
 
 
 #### [IOS app 编译](https://webrtc.googlesource.com/src/+/refs/heads/master/docs/native-code/ios/index.md)
