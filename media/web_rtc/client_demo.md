@@ -15,6 +15,30 @@
 
 1. 由于是 google 的东西，还是需要代理才能访问。
 
+
+2. 执行 `` 配置环境的时候，google fonts 下载不下来。
+
+```
+ File "./build/linux/install-chromeos-fonts.py", line 120, in <module>
+    sys.exit(main(sys.argv[1:]))
+  File "./build/linux/install-chromeos-fonts.py", line 67, in main
+    subprocess.check_call(['curl', '-L', url, '-o', tarball])
+  File "/usr/lib/python2.7/subprocess.py", line 185, in check_call
+    retcode = call(*popenargs, **kwargs)
+  File "/usr/lib/python2.7/subprocess.py", line 172, in call
+    return Popen(*popenargs, **kwargs).wait()
+  File "/usr/lib/python2.7/subprocess.py", line 1099, in wait
+    pid, sts = _eintr_retry_call(os.waitpid, self.pid, 0)
+  File "/usr/lib/python2.7/subprocess.py", line 125, in _eintr_retry_call
+    return func(*args)
+```
+
+可以单独执行 google font 安装脚本，再继续执行原脚本。
+
+```
+python ./build/linux/install-chromeos-fonts.py
+```
+
 2. cipd 下载失败
 
 ```
@@ -82,6 +106,20 @@ allprojects {
         jcenter()
     }
 }
+```
+
+7. 生成的项目根目录没有 `gradlew`，可以自己生成一个。
+
+```
+gradle wrapper
+
+
+```
+就可以使用了。
+
+To specify a Gradle version use --gradle-version on the command-line. Just execute the command:
+```
+gradle wrapper --gradle-version <your gradle version>
 ```
 
 

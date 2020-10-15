@@ -100,11 +100,6 @@ External library support: 扩展库
 
 调整 configure 的参数主要用于对编译进行调整，例如对编译器的优化等级进行配置，对运行目标平台进行设置，对编辑软件进行剪裁，只包含使用到的部分，其他功能的模块不编译，从而减小包体积。对于 ffmpeg 来说，如果想要使用 lib 库，可以只编译 lib 开发库，如果想要使用指令的方式运行，就不能屏蔽 `ffmpeg`, `fplay` 等命令行工具。
 
-可参考 https://blog.csdn.net/thezprogram/article/details/100029831
-
-ffmpeg参数讲解 https://blog.csdn.net/shulianghan/article/details/104351312
-https://blog.csdn.net/yu540135101/article/details/105183294/
-
 ### 编译 x264
 
 创建 `.sh` 结尾的脚本文件, 如`make_x264.sh`，添加执行权限。 脚本中已经内置了下载 x264 方式，但是要确保 git 命令可用。
@@ -270,3 +265,10 @@ android {
 
 ```
 
+参考内容:
+
+https://blog.csdn.net/thezprogram/article/details/100029831
+https://juejin.im/post/6844904048303276045#heading-9
+
+ffmpeg参数讲解 https://blog.csdn.net/shulianghan/article/details/104351312
+https://blog.csdn.net/yu540135101/article/details/105183294/
