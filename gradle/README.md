@@ -25,3 +25,12 @@ task helloWorld() {
     }
 }
 ```
+
+然后在当前目录下即可运行.
+```
+$ gradle -q helloWorld
+```
+
+`-q` 意为 `quiet`，使 gradle 仅输出 task 的输出。它是可选的。
+
+

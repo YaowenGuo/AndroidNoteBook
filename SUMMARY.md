@@ -128,6 +128,7 @@
     * [WebRTC](media/web_rtc/README.md)
       * [generate demo progect](media/web_rtc/client_demo.md)
       * [Android capture](media/web_rtc/android/1_capture.md)
+      * [GN and ninga](media/web_rtc/gn_and_ninga/README.md)
 
   * 输出
     * [MediaPlayer]

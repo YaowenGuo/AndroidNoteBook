@@ -2,9 +2,18 @@
 
 ## Android demo
 
+由与下载需要谷歌，也可以使用国内的镜像:
+
+声网镜像：https://webrtc.org.cn/mirror/#depotools%E2%80%8B
+
 ### 1. 前提
 
-- android 的开发官方只提供了 Linux 平台编译，其它平台编译难以保证，作为入门来说，尽快编译通过上手才是第一要素，如果在为了整各个平台上的编译而花费大量时间，恐怕是意见
+- android 的开发官方只提供了 Linux 平台编译，其它平台编译难以保证，作为入门来说，尽快编译通过上手才是第一要素，如果在为了整各个平台上的编译而花费大量时间，恐怕是得不偿失。
+
+- webrtc 由于牵涉到各个平台相关的代码，而现有的项目 `chromium` 浏览器用于挂平台已经积累了一些库，webrtc 也统一放在了这个代码管理平台上。需要先下载 `dept_tools` 用来下载和管理代码依赖，构建项目。
+
+  - fetch 是一个 python 脚本，用于从 chromium 仓库下载对应的项目。可以使用 `fetch -h` 查看都有哪些项目可供使用。例如 webrtc 的安卓平台的 webrtc_android.
+
 
 
 [详细的安装文档](https://webrtc.googlesource.com/src/+/refs/heads/master/docs/native-code/android/index.md)
