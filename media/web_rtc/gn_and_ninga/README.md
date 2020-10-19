@@ -81,3 +81,5 @@ root_dir
 |   |- 
 |
 ```
+
+gn 项目现在会检查 GClient 目录必须是一个 GClient 的 solution。紧
