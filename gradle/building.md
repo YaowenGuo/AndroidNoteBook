@@ -121,8 +121,8 @@ class Producer extends DefaultTask {
 
 ```groovy
 task makeReleaseVersion(type: ReleaseVersionTask) {
-    release = version.prodReady
-    outputFile = file('project-version.properties')
+    release = version.release
+    destFile = file('version.properties')
 }
 ```
 
@@ -216,3 +216,8 @@ Execution phase(根据依赖执行 task 的 action.)
 
 **Keep in mind that any configuration code is executed with every build of your proj- ect—even if you just execute gradle tasks.**
 
+有两种方式来设置构建生命周期的回调：闭包和实现监听器接口。如果你想要对程序由充分的测试，实现监听接口是一个更好的选择。
+
+![Lifecycle Hook](images/lifecycle_hook.png)
+
+![Task hook method](images/task_hook_method.png)
