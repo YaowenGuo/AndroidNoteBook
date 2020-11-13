@@ -76,6 +76,53 @@ class HelloWorld extends DefaultTask {
 }
 ```
 
+
+## 依赖
+
+依赖可以有几种类型：
+
+`dependsOn` 方法用于定义 task 之间的依赖关系。声明方式有多种
+
+### 1. 在定义 task 时声明。
+
+```
+task first {
+    doLast { println "first" }
+}
+task second {
+    doLast { println "second" }
+}
+task printVersion(dependsOn: second)  {
+    logger.quiet "Version: $version"
+}
+```
+
+也可以声明多个依赖
+
+```
+task printVersion(dependsOn: [second, first]) { 
+    logger.quiet "Version: $version"
+}
+```
+
+**`first` 和 `second` 的执行顺序是不确定的。**
+
+### 2. 对于已有的 task，也可以补充依赖
+
+```
+printVersion.dependsOn('first')
+```
+
+重要的是要理解 Gradle 不保证依赖任务的执行顺序。 dependsOn 仅定义需要先执行的依赖任务。 Gradle的哲学是声明在给定任务之前应该执行什么，而不是应该如何执行。 如果你使用过像Ant那样必须使用强制性地定义其依赖项的构建工具，则很难理解此概念。 在Gradle中，执行顺序是由任务的输入/输出规范自动确定的，正如您将在本章稍后看到的那样。 这个建筑设计决策有很多好处。 一方面，您无需了解整个任务依赖关系链即可进行更改，从而提高了代码的可维护性并避免了潜在的损坏。 另一方面，由于不必严格按照顺序执行构建，因此已启用了并行任务执行功能，这可以显着缩短构建执行时间。
+
+### 3. 自动推断
+
+当将一个 Task 的输出作为另一个 Task 的输入时，默认推断出他们之间的依赖。为了使依赖关系正确的得到推断，需要正确地配置 task 输入输出的位置。保证生产者和消费者 task 使用同一个位置。
+
+Property API不仅跟踪属性的值，还跟踪任务呀的生成值，从而使依赖推断更加容易，因此不必也指定它。以下面的代码为例，它有一个生产者和消费者任务，这两个任务是有依赖的:
+
+具体看下节，Task 的输入输出》
+
 ## Task 的输入输出
 
 一个 Task 可以包含一些输入以及一些输出。输入输出在 Task 依赖推断中占据着重要的作用。
@@ -136,63 +183,7 @@ producer.configure {
 }
 ```
 
-## 依赖
-
-`dependsOn` 方法用于定义 task 之间的依赖关系。声明方式有多种
-
-1. 在定义 task 时声明。
-
-```
-task first {
-    doLast { println "first" }
-}
-task second {
-    doLast { println "second" }
-}
-task printVersion(dependsOn: second)  {
-    logger.quiet "Version: $version"
-}
-```
-
-也可以声明多个依赖
-
-```
-task printVersion(dependsOn: [second, first]) { 
-    logger.quiet "Version: $version"
-}
-```
-
-**`first` 和 `second` 的执行顺序是不确定的。**
-
-2. 对于已有的 task，也可以补充依赖
-
-```
-printVersion.dependsOn('first')
-```
-
-重要的是要理解 Gradle 不保证依赖任务的执行顺序。 dependsOn 仅定义需要先执行的依赖任务。 Gradle的哲学是声明在给定任务之前应该执行什么，而不是应该如何执行。 如果你使用过像Ant那样必须使用强制性地定义其依赖项的构建工具，则很难理解此概念。 在Gradle中，执行顺序是由任务的输入/输出规范自动确定的，正如您将在本章稍后看到的那样。 这个建筑设计决策有很多好处。 一方面，您无需了解整个任务依赖关系链即可进行更改，从而提高了代码的可维护性并避免了潜在的损坏。 另一方面，由于不必严格按照顺序执行构建，因此已启用了并行任务执行功能，这可以显着缩短构建执行时间。
-
-3. 自动推断
-
-当将一个 Task 的输出作为另一个 Task 的输入时，默认推断出他们之间的依赖。为了使依赖关系正确的得到推断，需要正确地配置 task 输入输出的位置。保证生产者和消费者 task 使用同一个位置。
-
-Property API不仅跟踪属性的值，还跟踪任务呀的生成值，从而使依赖推断更加容易，因此不必也指定它。以下面的代码为例，它有一个生产者和消费者任务，这两个任务是有依赖的:
-
-依赖可以有几种类型：
-
-### 默认 DefaultTask 构建依赖
-
-```
-
-```
-
-
-
-1. 属性
-
-```groovy
-
-```
+如果 Task A 的输出作为 Task B 的输入，则 B 依赖于 A。
 
 ## 清理任务
 
@@ -218,6 +209,52 @@ Execution phase(根据依赖执行 task 的 action.)
 
 有两种方式来设置构建生命周期的回调：闭包和实现监听器接口。如果你想要对程序由充分的测试，实现监听接口是一个更好的选择。
 
+几个主要的 Hook 函数。
+
 ![Lifecycle Hook](images/lifecycle_hook.png)
 
 ![Task hook method](images/task_hook_method.png)
+
+在接口Project和Gradle中定义了许多生命周期回调方法。更多的钩子函数可以查看官方的文档。
+
+在配置时，Gradle决定了在执行阶段需要运行的任务的顺序。Task 根据依赖被构建为一个有向无环图。
+
+```groovy
+gradle.taskGraph.whenReady { TaskExecutionGraph taskGraph ->
+    println taskGraph.allTasks
+    if (taskGraph.hasTask(':release')) { // 或者 release
+        println "Change release value to true task is executed."
+        if (!version.release) {
+            version.release = true
+            ant.propertyfile(file: versionFile) {
+                entry(key: 'release', type: 'string', operation: '=', value: 'true')
+            }
+        }
+    }
+}
+```
+
+可以使用监听器来实现同样的功能。
+
+```groovy
+gradle.taskGraph.addTaskExecutionGraphListener(new TaskExecutionGraphListener() {
+    @Override
+    void graphPopulated(TaskExecutionGraph graph) {
+        if (graph.hasTask(release)) {
+            List<Task> allTasks = graph.allTasks
+            Task releaseTask = allTasks.find {it.path == ':release' }
+            Project project = releaseTask.project
+            if(!project.version.release) {
+                project.version.release = true
+                ant.propertyfile(file: versionFile) {
+                    entry(key: 'release', type: 'string', operation: '=', value: 'true')
+                }
+            }
+        }
+    }
+})
+```
+
+
+
+
