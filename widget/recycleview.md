@@ -199,3 +199,50 @@ https://www.jianshu.com/p/17080a269dfe
 点击
 
 recyclerView.setLayoutFrozen(true)
+
+
+### GridLayoutManager 的间距
+
+获取行和列
+
+```
+    @Override
+    public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+        super.getItemOffsets(outRect, view, parent, state);
+
+        RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+        if (layoutManager instanceof GridLayoutManager) {
+            GridLayoutManager gridManager = (GridLayoutManager) layoutManager;
+            int itemPosition = ((RecyclerView.LayoutParams) view.getLayoutParams()).getViewLayoutPosition();
+
+            int spanCount = gridManager.getSpanCount();
+            int childCount = parent.getChildCount();
+            GridLayoutManager.SpanSizeLookup lookup = gridManager.getSpanSizeLookup();
+//            int position = parent.getChildAdapterPosition(view);
+            RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) view.getLayoutParams();
+            int position = lp.getViewAdapterPosition();
+
+            int row = lookup.getSpanGroupIndex(position, spanCount);
+            int column = lookup.getSpanIndex(position, spanCount);
+            switch (gridManager.getItemViewType(view)) {
+                case SELECT_ITEM:
+                    if (column % 6 == 0) {
+                        outRect.right = space;
+                    } else if (column % 6 == 4) {
+                        outRect.left = space;
+                    } else {
+                        outRect.left = space;
+                        outRect.right = space;
+                    }
+                    break;
+                case COURSE_ITEM:
+                    if (column % 6 == 0) {
+                        outRect.right = space;
+                    } else if (column % 6 == 3) {
+                        outRect.left = space;
+                    }
+                    break;
+            }
+        }
+    }
+```
