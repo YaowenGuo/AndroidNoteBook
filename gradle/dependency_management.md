@@ -24,7 +24,8 @@ Java 插件(aply plugin: 'java')提供了 6 个现成的配置。
 - runtimeOnly 仅在运行时使用的依赖。
 - runtimeClasspath 运行时类路径包含实现的元素以及仅运行时元素。
 
-测试和调试的 
+测试和调试的
+- testImplementation (代替 testCompile) 
 - debugImplementation
 - androidTestImplementation
 ... 类似
