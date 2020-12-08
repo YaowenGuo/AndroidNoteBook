@@ -69,7 +69,7 @@
     if (!dirtyOpaque) onDraw(canvas);
 
     // Step 4, draw the children
-    dispatchDraw(canvas);
+    cDraw(canvas);
 
     // Step 5, draw the fade effect and restore layers
     canvas.drawRect(left, top, right, top + length, p);
