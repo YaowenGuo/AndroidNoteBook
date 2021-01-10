@@ -7,6 +7,7 @@ dependencies {
     implementation "org.webrtc:google-webrtc:$webrtc_version"
 }
 ```
+在网站查看该库的最新版本号 https://mvnrepository.com/artifact/org.webrtc/google-webrtc?repo=bt-google-webrtc
 
 ## 申请权限
 
