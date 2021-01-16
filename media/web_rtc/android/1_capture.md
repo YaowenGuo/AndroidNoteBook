@@ -34,6 +34,9 @@ if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 
 ## 获取相机
 
+![](images/WebRTCNativeAPIsDocument.png)
+
+
 WebRTC 对 Android 的 相机接口进行了封装，提供了 Camera1 和 Camera2 类使用。由于 Camera2 才是主流应用，这里使用 Camera2 做示例。
 
 ```kotlin
