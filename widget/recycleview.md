@@ -200,6 +200,7 @@ https://www.jianshu.com/p/17080a269dfe
 
 recyclerView.setLayoutFrozen(true)
 
+suppressLayout(true)
 
 ### GridLayoutManager 的间距
 

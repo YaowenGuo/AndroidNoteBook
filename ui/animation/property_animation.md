@@ -33,7 +33,7 @@ imageView.animate()
 
 ![方法表](images/animation_function.jpg)
 
-从图中可以看到， View 的每个方法都对应了 ViewPropertyAnimator 的两个方法，其中一个是带有 -By 后缀的，例如，View.setTranslationX() 对应了 ViewPropertyAnimator.translationX() 和  ViewPropertyAnimator.translationXBy() 这两个方法。其中带有 -By() 后缀的是增量版本的方法，例如，translationX(100) 表示用动画把 View 的 translationX 值渐变为 100，而  translationXBy(100) 则表示用动画把 View 的 translationX 值渐变地增加 100。
+从图中可以看到，View 的每个方法都对应了 ViewPropertyAnimator 的两个方法，其中一个是带有 -By 后缀的，例如，View.setTranslationX() 对应了 ViewPropertyAnimator.translationX() 和  ViewPropertyAnimator.translationXBy() 这两个方法。其中带有 -By() 后缀的是增量版本的方法，例如，translationX(100) 表示用动画把 View 的 translationX 值渐变为 100，而  translationXBy(100) 则表示用动画把 View 的 translationX 值渐变地增加 100。
 
 以上方法可以同时使用。
 
