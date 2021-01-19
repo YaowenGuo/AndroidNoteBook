@@ -23,3 +23,30 @@ include $(PREBUILT_SHARED_LIBRARY) # 导入
 LOCAL_SHARED_LIBRARIES := engine_so ffmpeg_so # 添加对与构建库的依赖才能被打进包中。
 ```
 
+
+2. 支持分包过滤
+
+```
+android {
+    ...
+    defaultConfig {
+        ...
+        externalNativeBuild {
+            ndkBuild {
+                // Passes optional arguments to ndk-build.
+                arguments 'NDK_DEBUG=1'
+
+                buildTypes {
+                    debug {
+                        abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
+                    }
+
+                    release {
+                        abiFilters 'armeabi-v7a'
+                    }
+                }
+            }
+        }
+    }
+}
+```
