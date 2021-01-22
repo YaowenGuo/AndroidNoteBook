@@ -37,81 +37,133 @@ if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 ![](images/WebRTCNativeAPIsDocument.png)
 
 
-WebRTC 对 Android 的 相机接口进行了封装，提供了 Camera1 和 Camera2 类使用。由于 Camera2 才是主流应用，这里使用 Camera2 做示例。
+WebRTC 标准定义了 MediaStream 对象。用于抽象媒体流。数据的源头可能是摄像头、话筒、屏幕截图、甚至是文件。虽然各中平台因为语言和编程哲学的不一而创建方法不一，但是只要符合标准，都有 MediaStram。 
+
+
+由于 WebRTC 主要还是用于音视频通话，这里以视频采集为例。WebRTC 对 Android 的相机接口进行了封装，提供了 Camera1 和 Camera2 类使用。由于 Camera2 才是主流应用，这里使用 Camera2 做示例。
+
+1. 为例创建一个摄像头的 VideoTrack, 由于牵涉到硬件，各个端实现的方式不一样。安卓端使用 Capture 来描述这一概念。
 
 ```kotlin
-// 2. Create a VideoCapturer instance which uses the camera of the device
-private fun createCameraCapturer(): VideoCapturer? {
-    val enumerator = Camera2Enumerator(this)
+public fun createCameraCapturer(
+    context: Context,
+    lensFacing: Int = CameraMetadata.LENS_FACING_FRONT
+): VideoCapturer? {
+    val enumerator = Camera2Enumerator(context)
     val deviceNames = enumerator.deviceNames
 
-    // First, try to find front facing camera
+    var videoCapturer: VideoCapturer? = null
     for (deviceName in deviceNames) {
-        if (enumerator.isFrontFacing(deviceName)) {
-            val videoCapturer: VideoCapturer? = enumerator.createCapturer(deviceName, null)
-            if (videoCapturer != null) {
-                return videoCapturer
+        when (lensFacing) {
+            CameraMetadata.LENS_FACING_FRONT -> {
+                if (enumerator.isFrontFacing(deviceName)) {
+                    videoCapturer = enumerator.createCapturer(deviceName, null)
+                }
             }
-        }
-    }
+            CameraMetadata.LENS_FACING_BACK -> {
+                if (enumerator.isBackFacing(deviceName)) {
+                    videoCapturer = enumerator.createCapturer(deviceName, null)
+                }
+            }
 
-    // Front facing camera not found, try something else
-    for (deviceName in deviceNames) {
-        if (!enumerator.isFrontFacing(deviceName)) {
-            val videoCapturer: VideoCapturer? = enumerator.createCapturer(deviceName, null)
-            if (videoCapturer != null) {
-                return videoCapturer
+            CameraMetadata.LENS_FACING_EXTERNAL -> {
+                if (!enumerator.isFrontFacing(deviceName) && !enumerator.isBackFacing(deviceName)) {
+                    videoCapturer = enumerator.createCapturer(deviceName, null)
+                }
+            }
+            else -> {
+                videoCapturer = enumerator.createCapturer(deviceName, null)
             }
         }
+
+        if (videoCapturer != null) {
+            break
+        }
     }
-    return null
+    return videoCapturer
 }
 ```
 
-## 开启摄像头
-
-WebRTC 是专门用于实时通信的，并没有独立开启摄像头的 API，我们使用对等连接的方式，开启摄像头。
+## 2. 创建 PeerConnection
 
 ```kotlin
-private fun openTrack(videoCapturer: VideoCapturer) {
-    // 1. Create and initialize PeerConnectionFactory
-    val initializationOptions = InitializationOptions.builder(this).createInitializationOptions()
-    PeerConnectionFactory.initialize(initializationOptions)
-    val peerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory()
+ public fun createPeerConnection(eglBaseContext: EglBase.Context, applicationContext: Context): PeerConnectionFactory {
+    val initializationOptions = PeerConnectionFactory.InitializationOptions
+        .builder(applicationContext)
+        .createInitializationOptions()
+    PeerConnectionFactory.initialize(initializationOptions);
 
+    val options = PeerConnectionFactory.Options()
+    val defaultVideoEncoderFactory = DefaultVideoEncoderFactory(eglBaseContext, true, true)
+    val defaultVideoDecoderFactory = DefaultVideoDecoderFactory(eglBaseContext)
 
-    val eglBaseContext = EglBase.create().eglBaseContext
-    val localView: SurfaceViewRenderer = findViewById(R.id.localView)
-    localView.setMirror(true)
-    localView.init(eglBaseContext, null)
+    return PeerConnectionFactory.builder()
+        .setOptions(options)
+        .setVideoEncoderFactory(defaultVideoEncoderFactory)
+        .setVideoDecoderFactory(defaultVideoDecoderFactory)
+        .createPeerConnectionFactory()
+}
+```
 
-    // 3. Create a VideoSource from the Capturer
+## 3. 创建 Video/Audio Track.
+
+```
+// create VideoTrack
+fun createVideoTrack(
+    peerConnectionFactory: PeerConnectionFactory,
+    id: String,
+    videoCapturer: VideoCapturer,
+    applicationContext: Context,
+    eglBaseContext: EglBase.Context,
+    captureThread: String = "CaptureThread"
+): VideoTrack {
+
     val videoSource: VideoSource = peerConnectionFactory.createVideoSource(videoCapturer.isScreencast)
-    val videoTrack: VideoTrack = peerConnectionFactory.createVideoTrack("101", videoSource)
+    val videoTrack: VideoTrack = peerConnectionFactory.createVideoTrack(id, videoSource)
 
-     // 4. Create a VideoTrack from the source
-     val audioSource: AudioSource = peerConnectionFactory.createAudioSource(MediaConstraints())
-    val audioTrack: AudioTrack = peerConnectionFactory.createAudioTrack("101", audioSource)
+    val surfaceTextureHelper = SurfaceTextureHelper.create(captureThread, eglBaseContext)
 
-    // 5. Create a video renderer using a SurfaceViewRenderer view and add it to the VideoTrack instance
-    videoTrack.addSink(localView)
-
-    // 6. 开启摄像头。
-    val surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglBaseContext)
     videoCapturer.initialize(
         surfaceTextureHelper,
         applicationContext,
         videoSource.capturerObserver
     )
+    // 开启摄像头。
     videoCapturer.startCapture(480, 640, 30)
-
-}
-
-// 连接相机获取和开启
-
-val videoCapturer: VideoCapturer? = createCameraCapturer()
-videoCapturer?.let {
-    openTrack(it)
+    return videoTrack
 }
 ```
 
+## 显示
+
+```kotlin
+public fun displayVideo(
+    videoTrack: VideoTrack,
+    displayView: SurfaceViewRenderer,
+    eglBaseContext: EglBase.Context
+) {
+    // display
+    displayView.init(eglBaseContext, null)
+    displayView.setMirror(true)
+    // display in localView
+    videoTrack.addSink(displayView)
+}
+```
+
+## 完整调用。
+
+```
+val videoCapturer = RtcEngine.INSTANCE.createCameraCapturer(this, CameraMetadata.LENS_FACING_FRONT)
+videoCapturer?.let {
+    val captureId = "1"
+    // Must use save eglContext
+    val eglBaseContext = EglBase.create().eglBaseContext
+
+    val peerConnection = RtcEngine.INSTANCE.createPeerConnection(this)
+    val videoTrack = RtcEngine.INSTANCE.createVideoTrack(peerConnection, captureId, it, this, eglBaseContext)
+    val audeoTrack = RtcEngine.INSTANCE.createAudioTrack(peerConnection, captureId)
+    RtcEngine.INSTANCE.displayVideo(videoTrack, findViewById(R.id.localView), eglBaseContext)
+}
+```
+
+API 的很小一部分创建图像捕获就包含如此多的代码，可见视频捕获的复杂性。而之所以有如此多的步骤 API 暴露出来，而不是封装起来只保留少数几个函数，其实是因为相机设置参数的复杂。有过相机开发经验的同学一定对此感触颇深。
