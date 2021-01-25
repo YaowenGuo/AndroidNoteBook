@@ -10,6 +10,22 @@ WebRtc 实现 P2P 链接，但是建立连接的过程需要服务器。在服�
 
 ![](images/WebRTCNativeAPIs_call.png)
 
+First, Alice and Bob exchange network information. (The expression finding candidates refers to the process of finding network interfaces and ports using the ICE framework.)
+
+- Alice creates an RTCPeerConnection object with an onicecandidate handler, which runs when network candidates become available.
+- Alice sends serialized candidate data to Bob through whatever signaling channel they are using, such as WebSocket or some other mechanism.
+- When Bob gets a candidate message from Alice, he calls addIceCandidate to add the candidate to the remote peer description.
+
+WebRTC clients (also known as peers, or Alice and Bob in this example) also need to ascertain and exchange local and remote audio and video media information, such as resolution and codec capabilities. Signaling to exchange media configuration information proceeds by exchanging an offer and an answer using the Session Description Protocol (SDP):
+
+- Alice runs the RTCPeerConnection createOffer() method. The return from this is passed an RTCSessionDescription—Alice's local session description.
+- In the callback, Alice sets the local description using setLocalDescription() and then sends this session description to Bob through their signaling channel. Note that RTCPeerConnection won't start gathering candidates until setLocalDescription() is called. This is codified in the JSEP IETF draft.
+- Bob sets the description Alice sent him as the remote description using setRemoteDescription().
+- Bob runs the RTCPeerConnection createAnswer() method, passing it the remote description he got from Alice so a local session can be generated that is compatible with hers. The createAnswer() callback is passed an RTCSessionDescription. Bob sets that as the local description and sends it to Alice.
+When Alice gets Bob's session description, she sets that as the remote description with setRemoteDescription.
+Ping!
+
+
 > Receive a Call
 
 ![](images/WebRTCNativeAPIs_receive.png)
@@ -175,6 +191,7 @@ private fun answer(videoTrack: VideoTrack, sdp: SessionDescription) {
     })
 }
 ```
+
 
 > Close Down a Call
 

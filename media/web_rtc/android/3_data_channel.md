@@ -2,6 +2,28 @@
 
 WebRTC 不仅可以传输音视频数据，还能点对点传输普通数据。而传输普通数据使用的是 `DataChannel`。 WebRTC 传输数据和传输音视频的连接建立流程一样。只不过需要在创建 `offer` 之前创建一个 `DataChannel`。
 
+该API有很多潜在的用例，包括：
+
+- 游戏
+
+- 远程桌面应用
+
+- 实时文字聊天
+
+- 文件传输
+
+- 分散网络
+
+该API有几个特性可以充分利用RTCPeerConnection，并支持强大而灵活的点对点通信
+
+- Multiple simultaneous channels with prioritization
+- 可选可靠交付和不可靠交付。
+- 内置安全性（DTLS）和拥塞控制
+- 可选是否同时有音频或视频
+
+
+
+
 
 WebRTC 可以传输音视频，也可以单独传输普通数据。也可以同时传输音视频和普通数据。
 
@@ -67,3 +89,11 @@ val conObserver = object : PeerConnection.Observer {
 ```
 
 如果对方创建了发送数据。 会在 `DataChannel.Observer` 的 `onMessage` 中收到数据。如果连接发生改变。则会在 `onStateChange` 会收到回调。
+
+通信是直接在浏览器之间进行的，因此即使在打孔处理防火墙和NAT失败时需要中继（TURN）服务器，RTCDataChannel也可以比WebSocket快得多。
+
+The syntax of RTCDataChannel is deliberately similar to WebSocket。 DataChannel 可以配置为支持不同类型的数据共享，例如优先考虑可靠的交付而不是性能时。
+
+SCTP 是 DataChannel DataChannel 使用的协议。默认情况下可靠、有序数据交付是开启的。何时 RTCDataChannel 需要提供数据可靠交付，何时性能更重要——即使是丢掉一些数据？
+
+When might RTCDataChannel need to provide reliable delivery of data, and when might performance be more important — even if that means losing some data?

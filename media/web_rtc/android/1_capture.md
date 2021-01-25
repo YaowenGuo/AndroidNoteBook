@@ -39,6 +39,14 @@ if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 
 WebRTC 标准定义了 MediaStream 对象。用于抽象媒体流。数据的源头可能是摄像头、话筒、屏幕截图、甚至是文件。虽然各中平台因为语言和编程哲学的不一而创建方法不一，但是只要符合标准，都有 MediaStram。 
 
+WebRTC implements these three APIs:
+
+```
+MediaStream (also known as getUserMedia)
+RTCPeerConnection
+RTCDataChannel
+
+```
 
 由于 WebRTC 主要还是用于音视频通话，这里以视频采集为例。WebRTC 对 Android 的相机接口进行了封装，提供了 Camera1 和 Camera2 类使用。由于 Camera2 才是主流应用，这里使用 Camera2 做示例。
 
