@@ -116,10 +116,13 @@
   * [function](kotlin/function.md)
   * [Coroutine](kotlin/coroutine/README.md)
 * [MultiMedia](media/README.md)
-  * [采样](media/capture.md)
+  * [原理]
+    * [采样](media/principle/capture.md)
+    * [Color model](media/principle/color_model.md)
+    * [Video](media/principle/video.md)
+  * [安卓音视频采集]
     * [Camera2 Overview](media/camera2_overview.md)
     * [Android Camera2](media/camera2_api.md)
-    * [Color model](media/color_model.md)
   * 编码/解码、封装/解封装、编辑、处理
     * [ffmpeg](media/ffmpeg/README.md)
     * [OpenCV](media/open_cv/README.md)
@@ -133,7 +136,7 @@
 
   * 输出
     * [MediaPlayer]
-    * [ExoPlayer]
+    * [ExoPlayer](media/exoplayer/exoplayer.md)
 
 * [Gradle](gradle/README.md)
   * [commend](gradle/commend.md)
