@@ -89,3 +89,17 @@ WebRTC 当前仅实现了点对点通信。但也可用于更复杂的网络场�
 
 but gateway servers can enable a WebRTC app running on a browser to interact with devices, such as telephones (also known as PSTN) and with VOIP systems. 
 
+
+
+## 修改 index.js
+
+```
+var fs = require('fs');
+var options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+};
+var app = http.createServer(options, function(req, res) {
+  fileServer.serve(req, res);
+}).listen(80);
+```
