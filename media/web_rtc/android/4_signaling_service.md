@@ -103,3 +103,57 @@ var app = http.createServer(options, function(req, res) {
   fileServer.serve(req, res);
 }).listen(80);
 ```
+
+
+
+
+## 问题
+
+> 1. socket 的服务器和 client 有版本对应，否则会出现访问不了的问题。例如 0.8 版本的信令连接是 `GET` 请求，而 `2.0` 变成了 `POST` 请求。
+
+[查看版本对应关系](https://github.com/socketio/socket.io-client-java)
+
+> 2. http 访问不了
+
+```
+
+```
+
+> 3. https 访问不了。
+
+docker 开放 443 端口用于 TLS 连接。
+
+```
+docker run -d -p 80:80 -p 443:443 --name webrtc_server_2 -v /Users/albert/project/webrtc/:/opt/webrtc -it webrtc_server_1 /bin/bash
+```
+
+`-p 443:443` 端口开放是必须的。
+
+> 4. 生成 key 和 证书
+
+```
+Shortest way. Tested on MacOS, but may work similarly on other OS.
+
+Generate pem
+
+> openssl req -x509 -newkey rsa:2048 -keyout keytmp.pem -out cert.pem -days 365
+
+> openssl rsa -in keytmp.pem -out key.pem
+```
+
+> 5. 无法访问 ERR_CONNECTION_REFUSED
+
+可能是端口号问题，不知道是不是 nodo 的问题，即便是 80 端口也需要加上 `https:127.0.0.1:80`。
+
+> 6. ERR_CONNECTION_CLOSED
+
+node 如果没有设置自动跳转，http 必须用 http 地址，https 也必须用 https 的地址访问。
+
+
+https://www.yearnfar.com/archives/141
+https://curl.se/docs/sslcerts.html
+https://blog.csdn.net/weixin_30531261/article/details/80891360
+https://www.jianshu.com/p/81dbcde4fd7c
+https://www.cnblogs.com/aaron-agu/p/10560659.html
+https://blog.csdn.net/qq285744011/article/details/103425147
+
