@@ -150,6 +150,7 @@ Generate pem
 node 如果没有设置自动跳转，http 必须用 http 地址，https 也必须用 https 的地址访问。
 
 
+https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 https://www.yearnfar.com/archives/141
 https://curl.se/docs/sslcerts.html
 https://blog.csdn.net/weixin_30531261/article/details/80891360
