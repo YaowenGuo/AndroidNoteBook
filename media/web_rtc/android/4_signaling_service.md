@@ -14,8 +14,7 @@ WebRTC 是为了建立点对点通信，为了设置和维持 WebRTC 呼叫，We
 由此，你需要信令服务器：可以在 WebRTC 客户端（对等端）之间传输信息的服务器。实际的消息就是纯文本:字符串化的JavaScript对象。
 
 
-## 
-
+## WebRTC 功能
 
 WebRTC apps need to do several things:
 
@@ -30,6 +29,8 @@ To acquire and communicate streaming data, WebRTC implements the following APIs:
 - MediaStream gets access to data streams, such as from the user's camera and microphone.
 - RTCPeerConnection enables audio or video calling with facilities for encryption and bandwidth management.
 - RTCDataChannel enables peer-to-peer communication of generic data.
+
+
 
 
 
@@ -143,7 +144,7 @@ Generate pem
 
 > 5. 无法访问 ERR_CONNECTION_REFUSED
 
-可能是端口号问题，不知道是不是 nodo 的问题，即便是 80 端口也需要加上 `https:127.0.0.1:80`。
+可能是端口号问题，不知道是不是 node.js 的问题，即便是 80 端口也需要加上 `https:127.0.0.1:80`。
 
 > 6. ERR_CONNECTION_CLOSED
 
@@ -151,10 +152,16 @@ Generate pem
 
 
 https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
+
 https://www.yearnfar.com/archives/141
+
 https://curl.se/docs/sslcerts.html
+
 https://blog.csdn.net/weixin_30531261/article/details/80891360
+
 https://www.jianshu.com/p/81dbcde4fd7c
+
 https://www.cnblogs.com/aaron-agu/p/10560659.html
+
 https://blog.csdn.net/qq285744011/article/details/103425147
 

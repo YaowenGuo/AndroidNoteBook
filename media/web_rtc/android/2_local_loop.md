@@ -2,6 +2,17 @@
 
 WebRtc 实现 P2P 链接，但是建立连接的过程需要服务器。在服务器还没有搭建的情况下，可以通过本地的连接来测试本地环境是通畅的。大部分手机都只能同时开启一个摄像头。因此这里将两个连接端的数据源使用同一个摄像头。两端收到的将是同样的视频数据。
 
+## WebRTC API 概览
+
+WebRTC 实现了三组标准 API:
+
+MediaStream (also known as getUserMedia)
+RTCPeerConnection
+RTCDataChannel
+
+这些 API 在[WebRTC](https://w3c.github.io/webrtc-pc/) 和 [getUserMedia](https://www.w3.org/TR/mediacapture-streams/) 这两个规范中定义。
+
+
 ![](images/WebRTCNativeAPIsDocument.png)
 
 
@@ -32,7 +43,7 @@ Ping!
 
 4. Add Stream
 
-在创建了 MeidaTrack 后，就可以创建 PeerConnection 了.
+在创建了 MeidaTrack 后，就可以创建 PeerConnection 了. 
 
 ```kotlin
 public fun connection(

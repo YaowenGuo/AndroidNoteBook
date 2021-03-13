@@ -115,6 +115,9 @@ public fun createCameraCapturer(
 
 ## 3. 创建 Video/Audio Track.
 
+`Track` 原意是铁轨的意思，两条铁轨并行向前，永远也不相交。音轨和视频也是类似的，或者多条音视频轨，随着时间的推进，音轨和视频同时录制和采样，但是数据却是分别记录的，没有任何交集。两者只有时间上的同步，数据本身没有任何瓜葛。
+
+
 ```
 // create VideoTrack
 fun createVideoTrack(

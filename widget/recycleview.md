@@ -247,3 +247,46 @@ suppressLayout(true)
         }
     }
 ```
+
+
+## 回收
+
+Android RecyclerView adapter has function's called,
+
+```
+
+
+onViewAttchedToWindow();
+
+onViewDetachedFromWindow();
+
+onViewRecycled();
+
+Use this function's to achieve.
+```
+
+页面销毁时，需要单独处理
+
+```
+@Override
+public void onDestroyView() {
+    super.onDestroyView();
+    mRecyclerView.setAdapter(null);
+}
+```
+
+
+ both modified:   module/jingpinban
+        both modified:   module/video
+        both modified:   module/zixi
+
+
+
+        modified:   lib/fenbi-ui
+        modified:   lib/paging
+        modified:   lib/truman-live
+        modified:   lib/uni-common 741a53e2
+        modified:   module/jingpinban
+        modified:   module/share
+        modified:   module/video
+        modified:   module/zixi

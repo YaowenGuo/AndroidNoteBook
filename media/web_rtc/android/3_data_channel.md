@@ -23,8 +23,6 @@ WebRTC 不仅可以传输音视频数据，还能点对点传输普通数据。�
 
 
 
-
-
 WebRTC 可以传输音视频，也可以单独传输普通数据。也可以同时传输音视频和普通数据。
 
 ## 创建 DataChannel
@@ -97,3 +95,6 @@ The syntax of RTCDataChannel is deliberately similar to WebSocket。 DataChannel
 SCTP 是 DataChannel DataChannel 使用的协议。默认情况下可靠、有序数据交付是开启的。何时 RTCDataChannel 需要提供数据可靠交付，何时性能更重要——即使是丢掉一些数据？
 
 When might RTCDataChannel need to provide reliable delivery of data, and when might performance be more important — even if that means losing some data?
+
+
+3. 
