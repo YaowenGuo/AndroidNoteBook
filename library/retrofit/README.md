@@ -1,4 +1,46 @@
-# 本文档的结构
+# Retrofit 的设计
+
+1. 网络请求头是固定的。
+2. 请求参数是可变的。
+3. 网络请求是一个流 
+```
+发送 ----------+ 
+             处理
+接收 <---------+
+```
+4. 可重定向
+5. 可缓存
+6. SSL
+
+## 有了 OKHttp 为什么还要 Retrofit？
+
+```Java
+Request request = new Request.Builder()
+  .url("http://publicobject.com/helloworld.txt")
+  .a
+  .build();
+
+OkHttpClient client = new OkHttpClient();
+
+client.newCall(request).
+  enqueue(new Callback() {
+      @Override
+      public void onFailure(@NonNull Call call, IOException e) {
+          // ....
+      }
+
+      @Override
+      public void onResponse(@NonNull Call call, Response response) throws IOException {
+          // ...
+      }
+   });
+```
+
+1. 简化 Builder 的代码重复。
+2. 可配置的。http 接口是分组，有结构的。接口的的所有接口定义都能归并的一个地方，能够更好地归纳，不同接口的区分更加明显。
+
+
+
 
 - 本页 `README.md` Retrofit的从简单到入门
 - [介绍什么是 RESTfulAPI](./RESTfulAPI.md)
@@ -9,12 +51,12 @@
 
 - [所思所想](./Speculative.md)
 
-学习we
 
 # Retrofit是什么？
 
 
 - [RESTfulAPI](./RESTfulAPI.md)
+
 # 在项目中使用Retrofit
 
 在安卓Module的gradle中添加如下的依赖：
@@ -25,7 +67,7 @@ compile 'com.squareup.retrofit2:retrofit:2.3.0'
 
 Retrofit是为具有RESTful的的接口进行封装的．而Retrofit做的最好的地方就是它对于结构的划分让整个网络请求代码非常清晰简洁．Retrofit和其它Http库最大区别在于通过大范围使用注解简化Http请求。
 
-要访问网络，首先就要制定网络接口，Retrofit讲网络接口的指定单独做到一起．加上使用注解的方式，让整个借口的参数指定变得清晰明了．看起来非常简洁．
+要访问网络，首先就要制定网络接口，Retrofit 将网络接口的指定单独做到一起．加上使用注解的方式，让整个接口的参数指定变得清晰明了，看起来非常简洁．
 
 ```Java
 public interface GitHubService {
