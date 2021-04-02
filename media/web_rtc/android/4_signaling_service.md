@@ -92,7 +92,20 @@ but gateway servers can enable a WebRTC app running on a browser to interact wit
 
 
 
-## 修改 index.js
+## 服务器
+
+在 `./server` 目录下有使用 Socket.io 作为信令服务器的代码。启动很简单。只需要在其目录下执行
+
+```shell
+num install
+node index.js
+```
+
+- 启动后，可以现在浏览器验证其连通性。注意输入的地址是否包含 `https` 和端口号。因为服务器没有设置自动跳转，即便是 `80` 端口，在 HTTPS 连接时也需要输入。
+
+- 如果使用自签名证书，不要忘记将自签名证书添加到浏览器所在的电脑信任证书中。因为自签名证书没有根证书的认证链，无法识别。
+
+- 注意 socket 监听(listen)的端口, 要设置为 `0.0.0.0`，否则仅能使用 `127.0.0.1` 访问，其他设备无法通过 IP 地址访问。
 
 ```
 var fs = require('fs');
@@ -102,8 +115,37 @@ var options = {
 };
 var app = http.createServer(options, function(req, res) {
   fileServer.serve(req, res);
-}).listen(80);
+}).listen(80, "0.0.0.0");
 ```
+
+## android 7.0 支持 http 连接
+
+从 安卓 7.0 开始，默认不支持 http 连接，必须使用 https。 为了在高版本手机上也能使用 http 连接，需要添加 xml 配置。
+
+在 res/xml 目录下添加资源文件 `network_security_config.xml`，并在此文件中添加。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
+```
+在 AndroidManitest.xml 中添加此文件的配置。
+
+```xml
+<application
+      android:networkSecurityConfig="@xml/network_security_config"
+      ...
+```
+
+## HTTPS 支持
+
+socket.io 可以使用 HTTP 连接，如果想要使用 HTTPS 连接，尽量使用公共机构签发的证书，也有免费的可以使用。自己生成 SSL 证书验证失败，比较麻烦。还需要自己添加代码，始终信任。多此一举，得不偿失。
 
 
 
@@ -151,9 +193,9 @@ Generate pem
 node 如果没有设置自动跳转，http 必须用 http 地址，https 也必须用 https 的地址访问。
 
 
-https://www.dyxmq.cn/network/err_cert_common_name_invalid.html
 
-https://www.yearnfar.com/archives/141
+
+
 
 https://curl.se/docs/sslcerts.html
 
