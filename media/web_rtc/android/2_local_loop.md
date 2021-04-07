@@ -6,7 +6,7 @@ WebRtc 实现 P2P 链接，但是建立连接的过程需要服务器。在服�
 
 WebRTC 实现了三组标准 API:
 
-MediaStream (also known as getUserMedia)
+MediaStream (also known as getUserMedia): 
 RTCPeerConnection
 RTCDataChannel
 

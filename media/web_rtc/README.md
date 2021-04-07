@@ -9,6 +9,24 @@ WebRTC 也确实不负众望，主流浏览器都已经支持 WebRTC。经历了
 WebRTC 是一个包括所有主流平台和服务器的项目，将其放在这里不太合适。既然主要关注于 Android 的 多媒体开发，暂且放在这里。
 
 
+## WebRTC 的功能
+
+- 获取音视频流，或者其他数据。
+- 获取网络信息，例如 IP 地址和端口，以及为了能够建立连接需要在客户端之间（对等端）交换这些信息。甚至需要穿越 NAT 和防火墙。
+- 协调启动/关闭会话,报告错误等信令通信。
+- 交换有关媒体和客户端功能的信息，例如分辨率和编解码器。
+- 传输音视频流或数据。
+
+为了获取和传输视频流，WebRTC 实现了如下 API.
+
+- MediaStream gets access to data streams, such as from the user's camera and microphone.
+- RTCPeerConnection enables audio or video calling with facilities for encryption and bandwidth management.
+- RTCDataChannel enables peer-to-peer communication of generic data.
+
+### MediaStream
+
+MediaStream API表示同步的媒体流。例如，从相机和麦克风输入的流具有同步的视频和音频轨道。
+
 
 ## WebRTC or RTMP
 
@@ -81,6 +99,7 @@ WebRTC 是一个包括所有主流平台和服务器的项目，将其放在这�
 为什么需要信令？这就好比旧社会的男女双方的婚嫁前，需要“媒婆”的中介一样。媒婆需要把男女双方的条件，比如家庭情况，个人的基本情况等信息告知对方，男女双方都觉得可行了，才会进入正式一对一（P2P,无需媒婆中转消息）的交流。这个例子中，男女双方在“媒婆”中介阶段不会直接沟通，所有的意思都可要经过中转，所以，这个阶段的沟通特点就是信息量较小，沟通的内容都是比较关键的，“骚话”是不能讲的，媒婆毕竟也是生意人，她也要服务其他男女；到了男女自行沟通的阶段了，他俩爱讲啥都无所谓了，反正没有经过中转。 例子讲完了，信令也解释完了，信令就是媒婆中介时的“双方的关键的基本信息”，媒婆就是信令服务器，负责正式沟通前的信息中转。当然，为什么实时音视频通信也需要“媒婆”呢？因为，每个计算机的硬件不一样，有的电脑没有声音播放的设备，有的没有摄像头设备， 在通信前，只有知道了对方的情况，才能决定该发送视频的数据还是音频的数据。
 
 P2P： 在webrtc的数据传输模块中会自动优选通信路线，优先使用p2p链路通信，如果p2p不成功，再使用中转通信，而建立P2P链路的过程就是我们俗称的“打洞、穿洞、NAT穿越”。
+
 ## 安装 git 扩展 depot_tools
 
 depot_tools 是一个用于和 google 开源库管理平台 Chromium 对接的 git 扩展程序。由于 git 的提交是不具名的，所以为了加强开源项目的管理，google 开发了一套 git 扩展程序用于管理提交。
@@ -127,8 +146,7 @@ MCU 适合视频会议，多人视频同时上传和接手。
 作为信令服务器的的服务有多种实现，Google 给出的一个 demo 是 AppRTC。 
 
 
-https://www.sohu.com/a/306564954_120122487
-https://blog.csdn.net/ai2000ai/article/details/80705410
+
 https://www.jianshu.com/p/43957ee18f1a
 https://blog.csdn.net/lingshengxueyuan/article/details/100519054
 https://blog.csdn.net/xiaojax/article/details/105372833
@@ -140,4 +158,3 @@ https://rtcdeveloper.com/t/topic/13341
 
 https://blog.csdn.net/jieqiang3/article/details/89604025
 
-https://github.com/webrtc/apprtc

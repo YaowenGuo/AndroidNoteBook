@@ -1,18 +1,17 @@
 'use strict';
 
-var os = require('os');
-var nodeStatic = require('node-static');
-var http = require('https');
-var socketIO = require('socket.io');
+const os = require('os');
+const nodeStatic = require('node-static');
+const socketIO = require('socket.io');
+const fs = require('fs');
+const fileServer = new(nodeStatic.Server)();
 
-var fs = require('fs');
-var options = {
-  key: fs.readFileSync('burp.key'),
-  cert: fs.readFileSync('burp.pem')
+const options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
 };
-
-var fileServer = new(nodeStatic.Server)();
-var app = http.createServer(options, function(req, res) {
+const http = require('https');
+const app = http.createServer(options, function(req, res) {
   fileServer.serve(req, res);
 }).listen(80, "0.0.0.0");
 
@@ -48,16 +47,11 @@ app.on("request",function(req,res){
       console.log(rizhi);
       return rizhi;
      }
-     function writeLog(f,req,res,status,size,fn){
+     function writeLog(file,req,res,status,size,fn){
          let rizhi = fn(req,status,size);
          fs.writeFileSync(file,rizhi)
      }
-    //  if(req.method.toLowerCase() === 'get'){
-    //    if(req.url === '/app'){
-    //        let status = 200;
-    //        let size = 20000;
-    //    }
-    //  }
+
     writeLog(file, req, res, 0, 0, getLog);
  });
 
@@ -92,6 +86,7 @@ io.sockets.on('connection', function(socket) {
       console.log(io.sockets.adapter.rooms); 
       console.log(socket.rooms); 
       log('Client ID ' + socket.id + ' created room ' + room);
+
       socket.emit('created', room, socket.id);
       clientsInRoom = io.sockets.adapter.rooms[room];
 
@@ -116,6 +111,10 @@ io.sockets.on('connection', function(socket) {
         }
       });
     }
+  });
+
+  socket.on('bye', function(){
+    console.log('received bye');
   });
 
 });
