@@ -176,3 +176,38 @@ open -a Xcode.app out/ios/all.xcodeproj/project.xcworkspace
 ```
 $ open -a Xcode.app out/ios/all.xcworkspace
 ```
+
+> M1 电脑执行 gclient sync 报错
+
+```
+[E2021-03-20T07:20:22.374578+08:00 69470 0 annotate.go:266] original error: exit status 100
+
+goroutine 1:
+#0 go.chromium.org/luci/vpython/venv/venv.go:615 - venv.(*Env).installVirtualEnv()
+  reason: failed to create VirtualEnv
+
+#1 go.chromium.org/luci/vpython/venv/venv.go:529 - venv.(*Env).createLocked.func2()
+  reason: failed to install VirtualEnv
+
+#2 go.chromium.org/luci/common/system/filesystem/tempdir.go:55 - filesystem.(*TempDir).With()
+#3 go.chromium.org/luci/vpython/venv/venv.go:103 - venv.withTempDir()
+#4 go.chromium.org/luci/vpython/venv/venv.go:515 - venv.(*Env).createLocked()
+#5 go.chromium.org/luci/vpython/venv/venv.go:272 - venv.(*Env).ensure.func1()
+  reason: failed to create new VirtualEnv
+
+#6 go.chromium.org/luci/vpython/venv/venv.go:995 - venv.mustReleaseLock()
+#7 go.chromium.org/luci/vpython/venv/venv.go:258 - venv.(*Env).ensure()
+#8 go.chromium.org/luci/vpython/venv/venv.go:154 - venv.With()
+  reason: failed to create empty probe environment
+
+#9 go.chromium.org/luci/vpython/run.go:62 - vpython.Run()
+#10 go.chromium.org/luci/vpython/application/application.go:320 - application.(*application).mainImpl()
+#11 go.chromium.org/luci/vpython/application/application.go:408 - application.(*Config).Main.func1()
+#12 go.chromium.org/luci/vpython/application/support.go:46 - application.run()
+#13 go.chromium.org/luci/vpython/application/application.go:407 - application.(*Config).Main()
+#14 vpython/main.go:110 - main.mainImpl()
+#15 vpython/main.go:116 - main.main()
+#16 runtime/proc.go:204 - runtime.main()
+#17 runtime/asm_amd64.s:1374 - runtime.goexit()
+Error: Command 'vpython src/build/landmines.py --landmine-scripts src/tools_webrtc/get_landmines.py --src-dir src' returned non-zero exit status 1 in /Users/a21/project/webrtc/webrtc-checkout
+```

@@ -4,3 +4,5 @@ Tablayout 只有一个 tab 的时候，即使设置模式为 fixed，也无法�
 ```xml
 android:maxTabWidth="1080dp";
 ```
+
+
