@@ -228,11 +228,6 @@ Generate pem
 
 
 
-
-
-
-https://curl.se/docs/sslcerts.html
-
 https://blog.csdn.net/weixin_30531261/article/details/80891360
 
 https://www.jianshu.com/p/81dbcde4fd7c
