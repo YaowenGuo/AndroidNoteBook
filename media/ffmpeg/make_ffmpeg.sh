@@ -16,7 +16,7 @@ cd ./ffmpeg
 
 # extra_ldflags="-nostdlib -lc"
 
-for((i=2; i<3; i++))
+for((i=0; i<1; i++))
 do
     configEnv ${targets[i]} ${compiler[i]} ${CPUS[i]} ${ARCHS[i]} "${extra_cflags_arr[i]}"
 
@@ -71,7 +71,6 @@ do
     --disable-ffprobe \
     --disable-ffplay \
     --disable-debug \
-    --disable-asm \
     --disable-avdevice \
     --disable-doc \
     --disable-symver \
@@ -81,7 +80,10 @@ do
     --enable-ffmpeg
 
     #  --enable-ffmpeg  这个没有实际使用，但是可以在编译的过程中验证链接是否有问题，如果不加这个，只有到安卓应用的 `.so` 库运行的时候才能发现以下错误。 
-   
+
+    # --extra-cflags="-Os -fpic $OPTIMIZE_CFLAGS" \
+    # --extra-ldflags="$ADDI_LDFLAGS"
+
     make clean
     make -j4
     make install
