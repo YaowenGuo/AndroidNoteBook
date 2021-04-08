@@ -35,24 +35,29 @@ if (room !== "") {
 }
 
 socket.on('created', function(room, clientId) {
+  // 只有创建房间的用户才有此回调
   console.log('Created room ' + room);
   isInitiator = true;
 });
+
+socket.on('joined', function(room) {
+  // 非发起者用户收到的回调。
+  console.log('joined: ' + room);
+  isChannelReady = true;
+});
+
+socket.on('join', function(room) {
+  // 其他用户加入的时候收到此回调
+  console.log('Another peer made a request to join room: ' + room);
+  console.log('This peer is the initiator of room ' + room + '!');
+  isChannelReady = true;
+})
+
 
 socket.on('full', function(room) {
   console.log('Message from client: Room ' + room + ' is full :^(');
 });
 
-socket.on('join', function(room) {
-  console.log('Another peer made a request to join room' + room);
-  console.log('This peer is the initiator of room ' + room + '!');
-  isChannelReady = true;
-})
-
-socket.on('joined', function(room) {
-  console.log('joined: ' + room);
-  isChannelReady = true;
-});
 
 socket.on('ipaddr', function(ipaddr) {
   console.log('Message from client: Server IP address is ' + ipaddr);
