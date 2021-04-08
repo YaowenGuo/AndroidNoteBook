@@ -45,10 +45,27 @@ WebRTC apps need to do several things:
 
 To acquire and communicate streaming data, WebRTC implements the following APIs:
 
+三个主要任务：
+
+- 获取 Audio 和 Video
+- 传输 Audio 和 Video
+- 传输任意数据
+
+由于这三个范畴，因此有了三个主要对象.
+
 - MediaStream gets access to data streams, such as from the user's camera and microphone.
 - RTCPeerConnection enables audio or video calling with facilities for encryption and bandwidth management.
 - RTCDataChannel enables peer-to-peer communication of generic data.
 
+
+MediaStream
+
+- MediaStream 代表一个独立且同步的 audio/video 的源或两者都有。
+- 每个 MediaStream 包含一个或多个 MediaStream tracks.
+
+![](images/mediaStream.png)
+
+MediaStream 不仅可以从摄像头获取数据，还能从屏幕获取数据流。也能用户视频流分析或者截取图片。
 
 
 
@@ -227,7 +244,7 @@ Generate pem
 node 如果没有设置自动跳转，http 必须用 http 地址，https 也必须用 https 的地址访问。
 
 
-
+自签名：
 https://blog.csdn.net/weixin_30531261/article/details/80891360
 
 https://www.jianshu.com/p/81dbcde4fd7c
