@@ -15,11 +15,13 @@ WebRTC 不仅可以传输音视频数据，还能点对点传输普通数据。�
 - 分散网络
 
 该API有几个特性可以充分利用RTCPeerConnection，并支持强大而灵活的点对点通信
+为了简单，故意将 API 设计为何 WebSocket 类似。
 
 - Multiple simultaneous channels with prioritization
 - 可选可靠交付和不可靠交付。
 - 内置安全性（DTLS）和拥塞控制
 - 可选是否同时有音频或视频
+- 尽可能低的延迟。
 
 
 

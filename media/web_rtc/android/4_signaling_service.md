@@ -67,6 +67,18 @@ MediaStream
 
 MediaStream 不仅可以从摄像头获取数据，还能从屏幕获取数据流。也能用户视频流分析或者截取图片。
 
+RTCPeerConnection
+
+对等端相互连接。RTCPeerConnection 将 MediaStream 获得的流作为输入，将 audio 和 video 发送到另一端。当另一端接收到数据流后，将作为一个 MediaStream 输出。另一端即可将其接入到一个 Video 组件中显示或者存储下来。
+
+在底层 RTCPeerConnection 做了很多事情
+
+- 信号处理: 降噪，回音消除
+- 编解码选择以及压缩和解压。
+- 对等端交流要处理 NAT/防火请穿越，或者在连接失败时使用中继。
+- 安全
+- 带宽管理
+
 
 
 ## SDP
