@@ -135,3 +135,7 @@ When might RTCDataChannel need to provide reliable delivery of data, and when mi
 
 
 
+
+## 延伸：为什么 DataChannel 选择 SCTP
+
+https://bloggeek.me/sctp-data-channel/

@@ -8,6 +8,8 @@ WebRTC 也确实不负众望，主流浏览器都已经支持 WebRTC。经历了
 
 WebRTC 是一个包括所有主流平台和服务器的项目，将其放在这里不太合适。既然主要关注于 Android 的 多媒体开发，暂且放在这里。
 
+WebRTC 是一项标准协议，甚至可以在没有浏览器的设备上使用。
+
 
 ## WebRTC 的功能
 
@@ -147,6 +149,11 @@ MCU 适合视频会议，多人视频同时上传和接手。
 
 
 
+### 有用的资源
+
+chrome://webrtc-internals/ 是 Chrome 浏览器内置的 WebRTC 调试工具。你可以在进行通话时使用该页面进行调试分析。它能够展示需索通话分析数据，展示通话过程中的内部工作。例如网络丢包、宽带、video 分辨率和大小。以及全部的 WebRTC API 的 log 数据。这些数据可以下载或导出。这些数据可以用户客户端有问题是的调试数据。
+
+
 https://www.jianshu.com/p/43957ee18f1a
 https://blog.csdn.net/lingshengxueyuan/article/details/100519054
 https://blog.csdn.net/xiaojax/article/details/105372833
@@ -157,4 +164,6 @@ https://blog.csdn.net/tifentan/article/details/53462535
 https://rtcdeveloper.com/t/topic/13341
 
 https://blog.csdn.net/jieqiang3/article/details/89604025
+
+
 
