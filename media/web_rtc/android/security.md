@@ -18,6 +18,6 @@ WebRTC有几个特性可以避免这些问题
 
 ![](images/securePathways.png)
 
-securePathways.png
+
 
 一旦信令安全传输完成，数据就会完全安全的传输。media 通过 SRTP 协议或者 Datagram TLS 传输数据。

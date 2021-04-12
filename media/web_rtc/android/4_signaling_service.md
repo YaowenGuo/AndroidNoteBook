@@ -1,6 +1,7 @@
-# 信令服务器
+# RTCPeerConnection API plus servers
 
-WebRTC 是为了建立点对点通信，为了设置和维持 WebRTC 呼叫，WebRTC 客户端（对等段）需要交换元数据。这些数据用于协调沟通。
+
+WebRTC 是为了建立点对点通信，为了设置和维持 WebRTC 呼叫，WebRTC 客户端（对等段）需要交换元数据。这些数据用于协调沟通。因此这个过程就成为”媒体协商。
 
 - Candidate (network) information.
 - Offer 和 answer 信息提供了媒体信息，例如分辨率和编解码。
@@ -22,13 +23,158 @@ WebRTC 是为了建立点对点通信，为了设置和维持 WebRTC 呼叫，We
 
 WebRTC 没有标准没有规定信令传输的标准，可以使用任何协议/机制进行传输这些信息。由于 WebRTC 是开源的，并且2017 年制定了国际标准。因此基于标准，有很多信令服务器实现。
 
+
+为了避免冗余和最大化与已建立技术的兼容性（不限制使用何种技术），发信令方法和协议没有在WebRTC标准中指定。JavaScript会话建立协议(JSEP)描述了连接的大纲。
+
+> WebRTC 呼叫建立的思考是对媒体层完全的定义和控制，但要尽可能将信号层留给应用。原因是不同的应用程序可能更喜欢使用不同的协议，例如现有的 `SIP` 或 `Jingle` 呼叫信令协议，或针对特定应用使用自定义协议，特别是新颖的用例。 在这种方式中，需要交换的关键信息是多媒体会话描述信息，它指定了建立媒体层所需的必要传输（transport）和媒体配置信息。
+
+
 ![](images/signaling.png)
 
+1. app 端首先连接到信令服务器，并提交各自的会话描述信息。
+2. 服务器将客户端发送火来的消息发送给另外客户端。
+3. 客户端在获取到会话信息后，直接和对方建立连接。（对等方连接）
 
+这种结构也避免了客户端（特别是web应用，http 请求是无状态的）保存状态信息，即，充当信令状态机。相反，如果应用端保存状态，但网页刷新或者应用退出都丢失状态信息，就会有问题。将信令状态保存在服务器上则可以避免这些问题。
+
+JSEP 要求在对等段交换 offer 和 answer ，即上述的媒体元数据信息。这些信息使用 `Session Description Protocol (SDP)` 格式。
+
+```
+v=0
+o=- 2319080246114730604 2 IN IP4 127.0.0.1
+s=-
+t=0 0
+a=group:BUNDLE 0
+a=extmap-allow-mixed
+a=msid-semantic: WMS 6INMjdJ8pgbaTN5CcEr4ZIVVTFcgl0hs7r1J
+m=video 9 UDP/TLS/RTP/SAVPF 96 97 98 99 100 101 102 121 127 120 125 107 108 109 124 119 123 118 114 115 116
+c=IN IP4 0.0.0.0
+a=rtcp:9 IN IP4 0.0.0.0
+a=ice-ufrag:mbrR
+a=ice-pwd:BNpY+m9tnvGeBGPso+M2l7Fi
+a=ice-options:trickle
+a=fingerprint:sha-256 E4:68:AF:CC:12:18:A6:F9:E8:0F:1B:BD:28:E6:37:C5:87:2C:18:C0:DD:B1:70:DE:E0:74:1A:60:54:28:F0:EA
+a=setup:actpass
+a=mid:0
+a=extmap:1 urn:ietf:params:rtp-hdrext:toffset
+a=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
+a=extmap:3 urn:3gpp:video-orientation
+a=extmap:4 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
+a=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay
+a=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type
+a=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing
+a=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space
+a=extmap:9 urn:ietf:params:rtp-hdrext:sdes:mid
+a=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id
+a=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id
+a=sendrecv
+a=msid:6INMjdJ8pgbaTN5CcEr4ZIVVTFcgl0hs7r1J 3809c8ce-d0a2-4093-aa48-12ed85395d8e
+a=rtcp-mux
+a=rtcp-rsize
+a=rtpmap:96 VP8/90000
+a=rtcp-fb:96 goog-remb
+a=rtcp-fb:96 transport-cc
+a=rtcp-fb:96 ccm fir
+a=rtcp-fb:96 nack
+a=rtcp-fb:96 nack pli
+a=rtpmap:97 rtx/90000
+a=fmtp:97 apt=96
+a=rtpmap:98 VP9/90000
+a=rtcp-fb:98 goog-remb
+a=rtcp-fb:98 transport-cc
+a=rtcp-fb:98 ccm fir
+a=rtcp-fb:98 nack
+a=rtcp-fb:98 nack pli
+a=fmtp:98 profile-id=0
+a=rtpmap:99 rtx/90000
+a=fmtp:99 apt=98
+a=rtpmap:100 VP9/90000
+a=rtcp-fb:100 goog-remb
+a=rtcp-fb:100 transport-cc
+a=rtcp-fb:100 ccm fir
+a=rtcp-fb:100 nack
+a=rtcp-fb:100 nack pli
+a=fmtp:100 profile-id=2
+a=rtpmap:101 rtx/90000
+a=fmtp:101 apt=100
+a=rtpmap:102 H264/90000
+a=rtcp-fb:102 goog-remb
+a=rtcp-fb:102 transport-cc
+a=rtcp-fb:102 ccm fir
+a=rtcp-fb:102 nack
+a=rtcp-fb:102 nack pli
+a=fmtp:102 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42001f
+a=rtpmap:121 rtx/90000
+a=fmtp:121 apt=102
+a=rtpmap:127 H264/90000
+a=rtcp-fb:127 goog-remb
+a=rtcp-fb:127 transport-cc
+a=rtcp-fb:127 ccm fir
+a=rtcp-fb:127 nack
+a=rtcp-fb:127 nack pli
+a=fmtp:127 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42001f
+a=rtpmap:120 rtx/90000
+a=fmtp:120 apt=127
+a=rtpmap:125 H264/90000
+a=rtcp-fb:125 goog-remb
+a=rtcp-fb:125 transport-cc
+a=rtcp-fb:125 ccm fir
+a=rtcp-fb:125 nack
+a=rtcp-fb:125 nack pli
+a=fmtp:125 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f
+a=rtpmap:107 rtx/90000
+a=fmtp:107 apt=125
+a=rtpmap:108 H264/90000
+a=rtcp-fb:108 goog-remb
+a=rtcp-fb:108 transport-cc
+a=rtcp-fb:108 ccm fir
+a=rtcp-fb:108 nack
+a=rtcp-fb:108 nack pli
+a=fmtp:108 level-asymmetry-allowed=1;packetization-mode=0;profile-level-id=42e01f
+a=rtpmap:109 rtx/90000
+a=fmtp:109 apt=108
+a=rtpmap:124 H264/90000
+a=rtcp-fb:124 goog-remb
+a=rtcp-fb:124 transport-cc
+a=rtcp-fb:124 ccm fir
+a=rtcp-fb:124 nack
+a=rtcp-fb:124 nack pli
+a=fmtp:124 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d0032
+a=rtpmap:119 rtx/90000
+a=fmtp:119 apt=124
+a=rtpmap:123 H264/90000
+a=rtcp-fb:123 goog-remb
+a=rtcp-fb:123 transport-cc
+a=rtcp-fb:123 ccm fir
+a=rtcp-fb:123 nack
+a=rtcp-fb:123 nack pli
+a=fmtp:123 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=640032
+a=rtpmap:118 rtx/90000
+a=fmtp:118 apt=123
+a=rtpmap:114 red/90000
+a=rtpmap:115 rtx/90000
+a=fmtp:115 apt=114
+a=rtpmap:116 ulpfec/90000
+a=ssrc-group:FID 3069108705 4016905269
+a=ssrc:3069108705 cname:3Yc30Or4EPpL4rK4
+a=ssrc:3069108705 msid:6INMjdJ8pgbaTN5CcEr4ZIVVTFcgl0hs7r1J 3809c8ce-d0a2-4093-aa48-12ed85395d8e
+a=ssrc:3069108705 mslabel:6INMjdJ8pgbaTN5CcEr4ZIVVTFcgl0hs7r1J
+a=ssrc:3069108705 label:3809c8ce-d0a2-4093-aa48-12ed85395d8e
+a=ssrc:4016905269 cname:3Yc30Or4EPpL4rK4
+a=ssrc:4016905269 msid:6INMjdJ8pgbaTN5CcEr4ZIVVTFcgl0hs7r1J 3809c8ce-d0a2-4093-aa48-12ed85395d8e
+a=ssrc:4016905269 mslabel:6INMjdJ8pgbaTN5CcEr4ZIVVTFcgl0hs7r1J
+a=ssrc:4016905269 label:3809c8ce-d0a2-4093-aa48-12ed85395d8e
+
+```
+
+```
+
+```
 
 ## WebRTC 功能
 
-WebRTC apps need to do several things:
+
+真实应用中，WebRTC 需要使用服务器。无论多简单的应用，都需要如下的过程。
 
 - 用户发现彼此并交换真实世界的信息，例如名字。
 - Get streaming audio, video, or other data.
@@ -36,6 +182,15 @@ WebRTC apps need to do several things:
 - Coordinate signaling communication to report errors and initiate or close sessions.
 - Exchange information about media and client capability, such as resolution and codecs.
 - Communicate streaming audio, video, or data.
+
+- 用户发现彼此并交换真实世界中的信息，例如名字。
+
+- WebRTC 客户端应用（对等端）交换网络信息。
+
+- 对等端交换有关媒体的信息，例如视频格式和分辨率。
+
+- WebRTC客户端应用程序穿越NAT(Network Address Translation，网络地址转换)网关和防火墙。
+
 
 也就是说 WebRTC 需要四种类型的 服务器端功能：
 - 用户的发现交流
@@ -69,7 +224,16 @@ MediaStream 不仅可以从摄像头获取数据，还能从屏幕获取数据�
 
 RTCPeerConnection
 
-对等端相互连接。RTCPeerConnection 将 MediaStream 获得的流作为输入，将 audio 和 video 发送到另一端。当另一端接收到数据流后，将作为一个 MediaStream 输出。另一端即可将其接入到一个 Video 组件中显示或者存储下来。
+RTCPeerConnection是WebRTC应用程序用于在对等方之间创建连接，并进行音频和视频通信的API。
+
+要初始化此过程，RTCPeerConnection有两个任务：
+
+- 确定本地媒体情况，例如分辨率和编解码器功能。 这是用于“报价与答”机制的元数据。
+- 获取应用程序主机的潜在网络地址，即候选地址。
+
+
+
+RTCPeerConnection 将 MediaStream 获得的流作为输入，将 audio 和 video 发送到另一端。当另一端接收到数据流后，将作为一个 MediaStream 输出。另一端即可将其接入到一个 Video 组件中显示或者存储下来。
 
 在底层 RTCPeerConnection 做了很多事情
 
@@ -78,6 +242,8 @@ RTCPeerConnection
 - 对等端交流要处理 NAT/防火请穿越，或者在连接失败时使用中继。
 - 安全
 - 带宽管理
+
+
 
 
 
@@ -93,28 +259,13 @@ RTCSessionDescription objects are blobs that conform to the [Session Description
 The acquisition and exchange of network and media information can be done simultaneously, but both processes must have completed before audio and video streaming between peers can begin.
 
 
-## RTCPeerConnection API plus servers
+## ICE 
 
-真实应用中，WebRTC 需要使用服务器。无论多简单的应用，都需要如下的过程。
+对等端也需要交换网络信息，“寻找候选对象（finding candidates）” 是指使用ICE框架查找网络接口和端口的过程。
 
-- 用户发现彼此并交换真实世界中的信息，例如名字。
+JSEP支持ICE Candidate Trickling，它允许呼叫者在初始报价之后向被呼叫者逐步提供候选者，并使被呼叫者开始对呼叫采取行动并建立连接，而不必等待所有候选者到达。
 
-- WebRTC 客户端应用（对等端）交换网络信息。
-
-- 对等端交换有关媒体的信息，例如视频格式和分辨率。
-
-- WebRTC客户端应用程序穿越NAT(Network Address Translation，网络地址转换)网关和防火墙。
-
-换而言之，WebRTC 需要四种类型的服务端能力：
-
-In other words, WebRTC needs four types of server-side functionality:
-
-- 用户发现和沟通。
-- 信令
-- NAT/防火墙穿透
-- 对等通信失败时中继服务器
-
-可以这么说，ICE框架使用STUN协议及其扩展TURN，使RTCPeerConnection能够处理NAT穿越和其他网络变化。
+ICE框架使用STUN协议及其扩展，TURN，使RTCPeerConnection能够处理NAT穿越和其他网络变化。
 
 ICE是一个连接对等体的框架,比如两个视频聊天客户端。ICE 首先尝试通过 UDP 以可能的最低延迟直接连接对等体。在此过程中，STUN服务器只有一项任务：使NAT之后的对等方能够找到其公共地址和端口。 (有关STUN和TURN的更多信息，请参阅[构建WebRTC应用程序所需的后端服务。](https://www.html5rocks.com/en/tutorials/webrtc/infrastructure/))
 
@@ -130,6 +281,9 @@ ICE是一个连接对等体的框架,比如两个视频聊天客户端。ICE 首
 3. 此时将 IP 地址发送给网络
 
 如果 UPD 失败，ICE 尝试 TCP。如果由于企业NAT穿透和防火墙的原因导致直接连接失败，ICE使用一个中介(中继)转换服务器（TURN）。表述 ”查找候选（finding candidates）“ 就是指这整个查找网络接口和端口的过程。
+
+
+
 
 
 ## 多点连接
@@ -271,5 +425,101 @@ https://blog.csdn.net/qq285744011/article/details/103425147
 https://www.html5rocks.com/en/tutorials/webrtc/infrastructure/#how-can-i-build-a-signaling-service
 
 https://bloggeek.me/siganling-protocol-webrtc/
+
+
+## Select Singling Server
+
+信令消息很小，并且大多在通话开始时进行交换。 在使用 `appr.tc` 进行视频聊天会话的测试中，信令服务处理了大约30-45条消息，所有消息的总大小约为10KB。
+
+WebRTC信令服务在带宽方面相对要求不高，因为它们只需要中继消息和保留少量的会话状态数据(如连接哪些客户端)，所以不会消耗太多的处理或内存。
+
+
+用于信令的消息服务必须是双向的：客户端到服务器以及服务器到客户端。 双向通信违背HTTP客户端/服务器请求/响应模型，但是为了将数据从Web服务器上运行的服务推送到Web浏览器上运行的Web应用程序，多年来已经开发出各种黑客手段，例如长轮询。
+
+WebSocket是一种更为自然的解决方案，专为全双工客户端与服务器之间的通信而设计，这些消息可以同时在两个方向上流动。 使用纯WebSocket或服务器发送的事件（EventSource）构建的信令服务的一个优势是，这些API的后端可以在大多数Web托管程序包通用的各种Web框架上实现，这些语言支持PHP，Python和 Ruby。
+
+即使建立了会话之后，在其他对等方更改或终止会话的情况下，对等方也需要轮询信令消息。显然轮询不是一个好的选择。
+
+### 可伸缩服务
+
+尽管信令服务在每个客户机上消耗的带宽和CPU相对较少，但一个流行应用程序的信令服务器可能必须处理来自不同位置的大量消息，并且具有较高的并发性。获得大量流量的 WebRTC 应用程序需要信号服务器能够处理相当大的负载。
+
+这里不详细介绍，但是有许多用于高容量、高性能消息传递的选项，包括以下几种：
+
+
+### 协议选择
+
+[原文](https://bloggeek.me/siganling-protocol-webrtc/)
+
+有五种不同类型的方案可供选择：
+
+| 协议                 |     用户     |  原因   |
+| ------------------- | ----------- | ------- |
+| XHR/ Comet          | 追求最广泛兼容性 | 因为 WebSockets 还无法在任何地方都得到支持 （只有 Opera Mini 不支持 https://caniuse.com/websockets） |
+| WebSockets          | 时尚者       | WebSockets 最新也是最适用于 客户-服务器端通信的 |
+| SIP over WebSockets | VoIP顽固派   | 连接现有的后端 | 
+| XMPP/Jingle         | XMPP 狂者这  | 能够使用 XMPP |
+| Data Channel        | 追求极限和创新的 | 能在建立连接之后用于信令，由于 WebRTC 能够建立 P2P 连接，能够最大限度降低服务器压力。 |
+
+
+
+####  Comet / XHR / SSE
+
+从本质上讲，这是一种使Web服务器能够向客户端发送消息的黑客-在处理通过服务器运行的两个用户/浏览器之间的会话之类的事情时，您需要执行此操作。这种技术有最广泛的支持。
+
+缺点： 
+
+- 伸缩性。 因为它们本质上是黑客，所以它们倾向于在服务器端占用更多资源，这意味着连接到服务器的浏览器更少，这转化为运营成本。
+
+- 该技术仍然需要您定义自己的专有信令消息。
+
+
+#### WebSockets
+
+2020 年了, WebSockets 不能算新的技术了，但是依旧有 Opera Mini 不支持 WebSocket，想必不支持是因为用户量不值得花费这么多开发人力吧。
+
+优点：
+
+- 快速，服务器有很好的伸缩性。
+- 既能传输文本，又能传输二进制数据。有最大的兼容性。
+
+缺点：
+
+- 并非所有的Web服务器和代理都支持它们，因此取决于您的体系结构和网络部署
+
+对于上述缺点，可以考虑使用混合解决方案，例如socket.io或SockJS，如果WebSocket不可用，它们可以自动“降级”到COMET机制。
+
+- 该技术仍然需要您定义自己的专有信令消息。
+
+#### SIP over WebSocket
+
+有预定义好的 SIP 消息，不必自定义消息。
+
+SIP 可以说是糟糕透顶，但是可以完成工作——除非你要将 WebRTC 连接到现有电话后端 IMS 或 RCS 的应用程序，需要“网关”进入SIP。
+除非您已经有 SIP 的应用，并且您的用例的主要部分包括呼叫 PSTN，否则请不要使用它。 即使你是VoIP 和 SIP 开发的人员。
+
+#### XMPP/Jingle
+
+与SIP类似，但是这次使用另一个称为XMPP的标准信令协议。
+
+如果您采用这种方法，则可能是因为您已经安装了XMPP，或者需要XMPP附带的现成功能（以及易于使用的服务器端实现）。
+
+我不是XMPP的拥护者，但是对于这种方法，真说不出什么不好的。 如果你喜欢 XMPP，那就去做吧。
+
+
+#### Data Channel
+
+Data Channel 是 WebRTC 中用于数据传输的部分。 一旦在两个“端点”之间建立了初始连接，您就可以使用数据通道进行通信并传输你的信令，而无需通过服务器。
+
+优点：
+
+- 信令消息的延迟更低，因为中间没有服务器需要解析和理解它们
+- 由于不涉及服务器，因此服务器的可扩展性得到了提高——它处理来自每个已连接浏览器的消息的数量减少了
+- 改进了隐私性，仅因为进入服务器可为您提供更少的信息
+
+#### 它为什么如此重要？
+
+选择信令协议将决定某些功能所需的开发工作以及您为此付出的成本–在会话的建立时间，服务器性能等方面。
+这个决定不应该掉以轻心。
 
 
