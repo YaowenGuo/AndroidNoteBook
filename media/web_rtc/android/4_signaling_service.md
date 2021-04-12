@@ -167,10 +167,6 @@ a=ssrc:4016905269 label:3809c8ce-d0a2-4093-aa48-12ed85395d8e
 
 ```
 
-```
-
-```
-
 ## WebRTC 功能
 
 
@@ -245,9 +241,7 @@ RTCPeerConnection 将 MediaStream 获得的流作为输入，将 audio 和 video
 
 
 
-
-
-## SDP
+### SDP
 
 RTCSessionDescription objects are blobs that conform to the [Session Description Protocol](https://en.wikipedia.org/wiki/Session_Description_Protocol), SDP. Serialized, an SDP object looks like this:
 
@@ -257,6 +251,26 @@ RTCSessionDescription objects are blobs that conform to the [Session Description
 ```
 
 The acquisition and exchange of network and media information can be done simultaneously, but both processes must have completed before audio and video streaming between peers can begin.
+
+
+### 信令陷阱
+
+- 在调用setLocalDescription（）之前，RTCPeerConnection不会开始收集候选对象。 这是[JSEP IETF草案中规定的](https://tools.ietf.org/html/draft-ietf-rtcweb-jsep-03#section-4.2.4)。
+
+- 为利用 Trickle ICE 的优势，应该在获得 `candidates` 后立即调用 addIceCandidate();
+
+### Readymade signaling servers
+
+If you don't want to roll your own, there are several WebRTC signaling servers available, which use Socket.IO like the previous example and are integrated with WebRTC client JavaScript libraries:
+
+- webRTC.io is one of the first abstraction libraries for WebRTC.
+- Signalmaster is a signaling server created for use with the SimpleWebRTC JavaScript client library.
+
+If you don't want to write any code at all, complete commercial WebRTC platforms are available from companies, such as vLine, OpenTok, and Asterisk.
+
+
+
+
 
 
 ## ICE 
@@ -283,7 +297,11 @@ ICE是一个连接对等体的框架,比如两个视频聊天客户端。ICE 首
 如果 UPD 失败，ICE 尝试 TCP。如果由于企业NAT穿透和防火墙的原因导致直接连接失败，ICE使用一个中介(中继)转换服务器（TURN）。表述 ”查找候选（finding candidates）“ 就是指这整个查找网络接口和端口的过程。
 
 
+For testing, Google runs a public STUN server, stun.l.google.com:19302, as used by appr.tc.
 
+For a production STUN/TURN service, use the coturn https://github.com/coturn/coturn
+
+restund https://github.com/otalk/restund
 
 
 ## 多点连接
@@ -436,7 +454,7 @@ WebRTC信令服务在带宽方面相对要求不高，因为它们只需要中�
 
 用于信令的消息服务必须是双向的：客户端到服务器以及服务器到客户端。 双向通信违背HTTP客户端/服务器请求/响应模型，但是为了将数据从Web服务器上运行的服务推送到Web浏览器上运行的Web应用程序，多年来已经开发出各种黑客手段，例如长轮询。
 
-WebSocket是一种更为自然的解决方案，专为全双工客户端与服务器之间的通信而设计，这些消息可以同时在两个方向上流动。 使用纯WebSocket或服务器发送的事件（EventSource）构建的信令服务的一个优势是，这些API的后端可以在大多数Web托管程序包通用的各种Web框架上实现，这些语言支持PHP，Python和 Ruby。
+
 
 即使建立了会话之后，在其他对等方更改或终止会话的情况下，对等方也需要轮询信令消息。显然轮询不是一个好的选择。
 
@@ -476,6 +494,10 @@ WebSocket是一种更为自然的解决方案，专为全双工客户端与服�
 
 #### WebSockets
 
+WebSocket是一种更为自然的解决方案，专为全双工客户端与服务器之间的通信而设计，这些消息可以同时在两个方向上流动。 使用纯WebSocket或服务器发送的事件（EventSource）构建的信令服务的一个优势是，这些API的后端可以在大多数Web托管程序包通用的各种Web框架上实现，这些语言支持PHP，Python和 Ruby。
+
+更重要的是，所有支持WebRTC的浏览器在台式机和移动设备上也都支持WebSocket。
+
 2020 年了, WebSockets 不能算新的技术了，但是依旧有 Opera Mini 不支持 WebSocket，想必不支持是因为用户量不值得花费这么多开发人力吧。
 
 优点：
@@ -498,7 +520,9 @@ WebSocket是一种更为自然的解决方案，专为全双工客户端与服�
 SIP 可以说是糟糕透顶，但是可以完成工作——除非你要将 WebRTC 连接到现有电话后端 IMS 或 RCS 的应用程序，需要“网关”进入SIP。
 除非您已经有 SIP 的应用，并且您的用例的主要部分包括呼叫 PSTN，否则请不要使用它。 即使你是VoIP 和 SIP 开发的人员。
 
-#### XMPP/Jingle
+#### XMPP(eXtensible Messaging and Presence Protocol )/Jingle
+
+可扩展消息传递和到场协议(eXtensible Messaging and Presence Protocol, XMPP)，最初称为Jabber，这是一种为即时消息传递开发的协议，可用于信令(服务器实现包括ejabberd和Openfire)。JavaScript客户端，比如Strophe.js，使用BOSH来模拟双向流，但是由于各种原因，BOSH可能不如WebSocket那么高效，同样的原因，也可能不能很好地扩展。WebRTC项目使用了来自libjingle库(一个Jingle的c++实现)的网络和传输组件。)
 
 与SIP类似，但是这次使用另一个称为XMPP的标准信令协议。
 
