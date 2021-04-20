@@ -141,11 +141,6 @@
     * []
 
 
-
-* [Gradle](gradle/README.md)
-  * [commend](gradle/commend.md)
-
-
 * Library desigin principle
   [RxJava](library/rxjava/README.md)
 
