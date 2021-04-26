@@ -25,7 +25,7 @@
 1. 由于是 google 的东西，还是需要代理才能访问。
 
 
-2. 执行 `` 配置环境的时候，google fonts 下载不下来。
+2. 执行 `gclient sync` 配置环境的时候，google fonts 下载不下来。
 
 ```
  File "./build/linux/install-chromeos-fonts.py", line 120, in <module>
@@ -103,6 +103,62 @@ subprocess.check_call(['tar', 'xf', u'/opt/webrtc/linux_android/src/build/linux/
 
 需要注意的是，生成的是一个 gradle 项目，而不是 Android Studio 项目。应该使用 Android Studio 的 import 的方式，而不是直接打开。另外生成的 demo 项目，依赖引用了项目之外的其他路径的文件。移动目录应该将整个 WebRtc 一起移动，而不是仅移动生成的 demo 目录。
 
+6. 
+
+> 缺少 pkg-config
+生成 Android Studio 项目错误。
+
+```
+gn gen out/Debug --args='target_os="android" target_cpu="arm"'
+```
+
+```
+Traceback (most recent call last):
+  File "/opt/webrtc/linux_android/src/build/config/linux/pkg-config.py", line 248, in <module>
+    sys.exit(main())
+  File "/opt/webrtc/linux_android/src/build/config/linux/pkg-config.py", line 143, in main
+    prefix = GetPkgConfigPrefixToStrip(options, args)
+  File "/opt/webrtc/linux_android/src/build/config/linux/pkg-config.py", line 82, in GetPkgConfigPrefixToStrip
+    "--variable=prefix"] + args, env=os.environ).decode('utf-8')
+  File "/usr/lib/python2.7/subprocess.py", line 216, in check_output
+    process = Popen(stdout=PIPE, *popenargs, **kwargs)
+  File "/usr/lib/python2.7/subprocess.py", line 394, in __init__
+    errread, errwrite)
+  File "/usr/lib/python2.7/subprocess.py", line 1047, in _execute_child
+    raise child_exception
+OSError: [Errno 2] No such file or directory
+```
+
+缺少 `pkg-config` 指令。 `subprocess.check_output` 就是执行一个 linux 指令，获得输出。只需要安装 `pkg-config`:
+
+```shell
+$ apt install pkg-config
+```
+
+
+> 缺少 gcc
+
+```
+FAILED: gen/examples/AppRTCMobile__build_config_srcjar/java_cpp_template/org/chromium/base/BuildConfig.java
+python ../../build/android/gyp/gcc_preprocess.py --depfile gen/examples/AppRTCMobile__build_config_srcjar_BuildConfig.d --include-path ../../ --output gen/examples/AppRTCMobile__build_config_srcjar/java_cpp_template/org/chromium/base/BuildConfig.java --template=../../base/android/java/templates/BuildConfig.template --defines _DCHECK_IS_ON --defines USE_FINAL --defines ENABLE_MULTIDEX --defines _MIN_SDK_VERSION=21
+Traceback (most recent call last):
+  File "../../build/android/gyp/gcc_preprocess.py", line 54, in <module>
+    sys.exit(main(sys.argv[1:]))
+  File "../../build/android/gyp/gcc_preprocess.py", line 47, in main
+    DoGcc(options)
+  File "../../build/android/gyp/gcc_preprocess.py", line 31, in DoGcc
+    build_utils.CheckOutput(gcc_cmd)
+  File "/opt/webrtc/linux_android/src/build/android/gyp/util/build_utils.py", line 257, in CheckOutput
+    stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
+  File "/usr/lib/python2.7/subprocess.py", line 394, in __init__
+    errread, errwrite)
+  File "/usr/lib/python2.7/subprocess.py", line 1047, in _execute_child
+    raise child_exception
+```
+
+```
+$ apt install gcc
+```
 
 6. 解决AndroidStudio编译出现"Could not resolve all files for configuration ':library:_internal_aapt2_binary'"
 
