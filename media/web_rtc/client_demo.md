@@ -267,3 +267,81 @@ goroutine 1:
 #17 runtime/asm_amd64.s:1374 - runtime.goexit()
 Error: Command 'vpython src/build/landmines.py --landmine-scripts src/tools_webrtc/get_landmines.py --src-dir src' returned non-zero exit status 1 in /Users/a21/project/webrtc/webrtc-checkout
 ```
+
+
+## Mac 编译 android so
+
+https://blog.csdn.net/liuwenchang1234/article/details/107559530
+
+1. 替换 ndk 和 llvm
+
+```
+cp -r  /usr/local/Cellar/llvm/12.0.0/* third_party/llvm-build/Release+Asserts/
+
+```
+
+
+> fatal error: ‘features.h‘ file not found
+
+替换 nkd.
+
+2. 
+
+```
+error: unable to find plugin 'find-bad-constructs'
+1 error generated.
+[44/11084] CXX obj/api/transport/stun_unittest/stun_unittest.o
+ninja: build stopped: subcommand failed.
+```
+
+[For the clang plugins, add `clang_use_chrome_plugins = false` to your args.gn to disable them.](https://groups.google.com/a/chromium.org/g/blink-dev/c/Ep4GJJHFNYI)
+
+
+> jdk
+
+```
+  File "/usr/local/Cellar/python@3.9/3.9.4/Frameworks/Python.framework/Versions/3.9/lib/python3.9/subprocess.py", line 1821, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/albert/project/webrtc/android_on_mac/src/third_party/jdk/current/bin/javap'
+```
+
+
+
+> aapt2
+
+```
+[5984/9904] ACTION //examples:AppRTCMobile__compile_resources(//build/toolchain/android:android_clang_arm)
+FAILED: gen/examples/AppRTCMobile__compile_resources.srcjar obj/examples/AppRTCMobile.ap_ obj/examples/AppRTCMobile.ap_.info gen/examples/AppRTCMobile__compile_resources_R.txt obj/examples/AppRTCMobile/AppRTCMobile.resources.proguard.txt gen/examples/AppRTCMobile__compile_resources.resource_ids
+python3 ../../build/android/gyp/compile_resources.py --include-resources=@FileArg\(gen/examples/AppRTCMobile.build_config:android:sdk_jars\) --aapt2-path ../../third_party/android_build_tools/aapt2/aapt2 --dependencies-res-zips=@FileArg\(gen/examples/AppRTCMobile.build_config:deps_info:dependency_zips\) --extra-res-packages=@FileArg\(gen/examples/AppRTCMobile.build_config:deps_info:extra_package_names\) --extra-main-r-text-files=@FileArg\(gen/examples/AppRTCMobile.build_config:deps_info:extra_main_r_text_files\) --min-sdk-version=21 --target-sdk-version=29 --webp-cache-dir=obj/android-webp-cache --android-manifest gen/examples/AppRTCMobile_manifest/AndroidManifest.xml --srcjar-out gen/examples/AppRTCMobile__compile_resources.srcjar --version-code 1 --version-name Developer\ Build --arsc-path obj/examples/AppRTCMobile.ap_ --info-path obj/examples/AppRTCMobile.ap_.info --debuggable --r-text-out gen/examples/AppRTCMobile__compile_resources_R.txt --dependencies-res-zip-overlays=@FileArg\(gen/examples/AppRTCMobile.build_config:deps_info:dependency_zips\) --proguard-file obj/examples/AppRTCMobile/AppRTCMobile.resources.proguard.txt --emit-ids-out=gen/examples/AppRTCMobile__compile_resources.resource_ids --depfile gen/examples/AppRTCMobile__compile_resources.d
+E 54650    906 Subprocess raised an exception:
+Traceback (most recent call last):
+  File "/Users/albert/project/webrtc/android_on_mac/src/build/android/gyp/util/parallel.py", line 70, in __call__
+    return self._func(*_fork_params[index], **_fork_kwargs)
+TypeError: 'NoneType' object is not subscriptable
+
+[5993/9904] CXX obj/p2p/rtc_p2p_unittests/basic_port_allocator_unittest.o
+```
+
+
+
+## 编译 so 文件
+
+debug
+
+```
+gn gen out/debug --args='proprietary_codecs=true rtc_use_h264=true is_chrome_branded=true is_component_ffmpeg=true is_clang=true use_lld=true target_os="android" target_cpu="arm64" is_debug=true rtc_include_tests=false treat_warnings_as_errors=false android_full_debug=true symbol_level=2 strip_absolute_paths_from_debug_symbols=false'
+```
+
+relese
+
+```
+gn gen out/release --args='proprietary_codecs=true rtc_use_h264=true is_chrome_branded=true is_component_ffmpeg=true is_clang=true use_lld=true target_os="android" target_cpu="arm64" is_debug=false rtc_include_tests=false treat_warnings_as_errors=false android_full_debug=false'
+```
+
+编译
+
+```
+ninja -C out/debug
+cp out/debug/obj/libwebrtc.a <dir>
+```
+
