@@ -328,19 +328,13 @@ TypeError: 'NoneType' object is not subscriptable
 
 debug
 
-```
-gn gen out/debug --args='proprietary_codecs=true rtc_use_h264=true is_chrome_branded=true is_component_ffmpeg=true is_clang=true use_lld=true target_os="android" target_cpu="arm64" is_debug=true rtc_include_tests=false treat_warnings_as_errors=false android_full_debug=true symbol_level=2 strip_absolute_paths_from_debug_symbols=false'
-```
-
-relese
-
-```
-gn gen out/release --args='proprietary_codecs=true rtc_use_h264=true is_chrome_branded=true is_component_ffmpeg=true is_clang=true use_lld=true target_os="android" target_cpu="arm64" is_debug=false rtc_include_tests=false treat_warnings_as_errors=false android_full_debug=false'
+```shell
+gn gen out/arm --args='target_os="android" target_cpu="arm" use_custom_libcxx=false'
 ```
 
 编译
 
-```
+```shell
 ninja -C out/debug
 cp out/debug/obj/libwebrtc.a <dir>
 ```
