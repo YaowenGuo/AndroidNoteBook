@@ -268,6 +268,8 @@ goroutine 1:
 Error: Command 'vpython src/build/landmines.py --landmine-scripts src/tools_webrtc/get_landmines.py --src-dir src' returned non-zero exit status 1 in /Users/a21/project/webrtc/webrtc-checkout
 ```
 
+更新系统和 golang 版本就好了。
+
 
 ## Mac 编译 android so
 
@@ -276,6 +278,9 @@ https://blog.csdn.net/liuwenchang1234/article/details/107559530
 1. 替换 ndk 和 llvm
 
 ```
+编译 llvm.
+./src/tools/clang/scripts/build.py --without-fuchsia
+
 cp -r  /usr/local/Cellar/llvm/12.0.0/* third_party/llvm-build/Release+Asserts/
 
 ```
@@ -305,6 +310,8 @@ ninja: build stopped: subcommand failed.
 FileNotFoundError: [Errno 2] No such file or directory: '/Users/albert/project/webrtc/android_on_mac/src/third_party/jdk/current/bin/javap'
 ```
 
+java11.4 放到 `third_part/jdk/current/` 目录下。
+java8 放到 `third_part/jdk/extras/java_8/` 目录下。
 
 
 > aapt2
@@ -395,4 +402,22 @@ target_link_libraries( # Specifies the target library.
         ${camera-lib}
         ${media-lib}
         ${log-lib})
+```
+
+> 缺少 rtc_bash 中的 json 格式化函数
+
+修改 src/BUILD.gn
+```gn
+if (!build_with_chromium) {
+  # Target to build all the WebRTC production code.
+  rtc_static_library("webrtc") {
+    ...
+    deps = [
+      ...
+      "rtc_base:rtc_json", # 添加依赖
+    ]
+    ... 
+  }
+}
+
 ```
