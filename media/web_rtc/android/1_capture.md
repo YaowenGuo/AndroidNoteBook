@@ -92,7 +92,7 @@ public fun createCameraCapturer(
 }
 ```
 
-## 2. 创建 PeerConnection
+## 2. 创建 PeerConnectionFactory
 
 ```kotlin
  public fun createPeerConnection(eglBaseContext: EglBase.Context, applicationContext: Context): PeerConnectionFactory {

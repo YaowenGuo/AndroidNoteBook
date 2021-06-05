@@ -329,7 +329,90 @@ TypeError: 'NoneType' object is not subscriptable
 [5993/9904] CXX obj/p2p/rtc_p2p_unittests/basic_port_allocator_unittest.o
 ```
 
+4. Socket 连接失败
 
+```
+python3 ../../build/android/gyp/compile_java.py --depfile=gen/build/android/bytecode/bytecode_processor__errorprone.d --generated-dir=gen/build/android/bytecode/bytecode_processor/generated_java --jar-path=obj/build/android/bytecode/bytecode_processor__errorprone.errorprone.stamp --java-srcjars=\[\"gen/build/android/bytecode/bytecode_processor.generated.srcjar\"\] --header-jar obj/build/android/bytecode/bytecode_processor.turbine.jar --classpath=\[\"obj/build/android/bytecode/bytecode_processor.turbine.jar\"\] --classpath=@FileArg\(gen/build/android/bytecode/bytecode_processor.build_config:deps_info:javac_full_interface_classpath\) --chromium-code=1 --warnings-as-errors --target-name //build/android/bytecode/bytecode_processor__errorprone:bytecode_processor__errorprone --processorpath=@FileArg\(gen/tools/android/errorprone_plugin/errorprone_plugin.build_config:deps_info:host_classpath\) --enable-errorprone @gen/build/android/bytecode/bytecode_processor.sources
+Traceback (most recent call last):
+  File "/Users/albert/project/webrtc/webrtc-checkout/src/out/arm/../../build/android/gyp/compile_java.py", line 756, in <module>
+    sys.exit(main(sys.argv[1:]))
+  File "/Users/albert/project/webrtc/webrtc-checkout/src/out/arm/../../build/android/gyp/compile_java.py", line 645, in main
+    and server_utils.MaybeRunCommand(name=options.target_name,
+  File "/Users/albert/project/webrtc/webrtc-checkout/src/build/android/gyp/util/server_utils.py", line 40, in MaybeRunCommand
+    raise e
+  File "/Users/albert/project/webrtc/webrtc-checkout/src/build/android/gyp/util/server_utils.py", line 27, in MaybeRunCommand
+    sock.connect(SOCKET_ADDRESS)
+FileNotFoundError: [Errno 2] No such file or directory
+```
+
+在 Mac 上编译一直报错，原来是 `server_utils.py` 连接 socket 和 linux 上运行的结果不一样。 在 `server_utils.py` 的代码
+
+```python
+def MaybeRunCommand(name, argv, stamp_file):
+  """Returns True if the command was successfully sent to the build server."""
+
+  # When the build server runs a command, it sets this environment variable.
+  # This prevents infinite recursion where the script sends a request to the
+  # build server, then the build server runs the script, and then the script
+  # sends another request to the build server.
+  if BUILD_SERVER_ENV_VARIABLE in os.environ:
+    return False
+  with contextlib.closing(socket.socket(socket.AF_UNIX)) as sock:
+    try:
+      sock.connect(SOCKET_ADDRESS)
+      sock.sendall(
+          json.dumps({
+              'name': name,
+              'cmd': argv,
+              'cwd': os.getcwd(),
+              'stamp_file': stamp_file,
+          }).encode('utf8'))
+    except socket.error as e:
+      # [Errno 111] Connection refused. Either the server has not been started
+      #             or the server is not currently accepting new connections.
+      if e.errno == 111:
+        return False
+      raise e
+  return True
+```
+
+socket `socket.AF_UNIX` 是用于连接本地的服务，是 UNIX 的基本协议。编译根本不会启动这个协议，在 Linux 上运行会连接被拒绝，走 `if e.errno == 111:` 这一行，返回 `False` 可以接续执行。而在 Linux 上，会找 `SOCKET_ADDRESS` 所指的文件报：
+
+```
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+FileNotFoundError: [Errno 2] No such file or directory
+```
+因为根本没有程序启动这个服务，可以用 `grep -r "chromium_build_server_socket"  <webrtc source dir>` 查找 webrtc 整个源码验证。
+
+为了正常编译，可以修改代码，以忽略这个错误
+
+```
+def MaybeRunCommand(name, argv, stamp_file):
+  """Returns True if the command was successfully sent to the build server."""
+
+  # When the build server runs a command, it sets this environment variable.
+  # This prevents infinite recursion where the script sends a request to the
+  # build server, then the build server runs the script, and then the script
+  # sends another request to the build server.
+  if BUILD_SERVER_ENV_VARIABLE in os.environ:
+    return False
+  with contextlib.closing(socket.socket(socket.AF_UNIX)) as sock:
+    try:
+      sock.connect(SOCKET_ADDRESS)
+      sock.sendall(
+          json.dumps({
+              'name': name,
+              'cmd': argv,
+              'cwd': os.getcwd(),
+              'stamp_file': stamp_file,
+          }).encode('utf8'))
+    except socket.error as e:
+      # [Errno 111] Connection refused. Either the server has not been started
+      #             or the server is not currently accepting new connections.
+      return False
+  return True
+```
 
 ## 编译 so 文件
 
@@ -343,6 +426,8 @@ gn gen out/arm --args='target_os="android" target_cpu="arm" use_custom_libcxx=fa
 
 ```shell
 ninja -C out/debug
+# 或者指定编译目标，更快编译。
+# ninja -C out/debug webrtc
 cp out/debug/obj/libwebrtc.a <dir>
 ```
 
