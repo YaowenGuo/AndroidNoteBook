@@ -280,8 +280,8 @@ https://blog.csdn.net/liuwenchang1234/article/details/107559530
 ```
 编译 llvm.
 ./src/tools/clang/scripts/build.py --without-fuchsia
-
-cp -r  /usr/local/Cellar/llvm/12.0.0/* third_party/llvm-build/Release+Asserts/
+# 或者下面这个复制
+# cp -r  /usr/local/Cellar/llvm/12.0.0/* third_party/llvm-build/Release+Asserts/
 
 ```
 
@@ -376,7 +376,7 @@ def MaybeRunCommand(name, argv, stamp_file):
   return True
 ```
 
-socket `socket.AF_UNIX` 是用于连接本地的服务，是 UNIX 的基本协议。编译根本不会启动这个协议，在 Linux 上运行会连接被拒绝，走 `if e.errno == 111:` 这一行，返回 `False` 可以接续执行。而在 Linux 上，会找 `SOCKET_ADDRESS` 所指的文件报：
+[`socket.AF_UNIX` 用于同一台机器上的进程间通信](https://blog.csdn.net/ccwwff/article/details/45693253)，是 UNIX 的基本协议。webrtc 编译根本不会启动这个服务，在 Linux 上运行会连接被拒绝，走 `if e.errno == 111:` 这一行，返回 `False` 可以接续执行。而在 Mac 上，会找 `SOCKET_ADDRESS` 所指的文件报：
 
 ```
 Traceback (most recent call last):
