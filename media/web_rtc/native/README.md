@@ -1,5 +1,7 @@
 # Native 代码
 
+[webrtc 目前最新版本是 M89，其更新记录就保存在源代码的 docs/release-notes.md](https://chromium.googlesource.com/external/webrtc/+/refs/heads/master/docs/release-notes.md)
+
 ## 目录结构
 
 ```

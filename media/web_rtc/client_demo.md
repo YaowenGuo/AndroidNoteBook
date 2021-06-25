@@ -281,16 +281,16 @@ https://blog.csdn.net/liuwenchang1234/article/details/107559530
 编译 llvm.
 ./src/tools/clang/scripts/build.py --without-fuchsia
 # 或者下面这个复制
-# cp -r  /usr/local/Cellar/llvm/12.0.0/* third_party/llvm-build/Release+Asserts/
+# ln -s  /usr/local/Cellar/llvm/<对应版本> third_party/llvm-build/Release+Asserts
 
 ```
 
 
 > fatal error: ‘features.h‘ file not found
 
-替换 nkd.
+替换 ndk.
 
-2. 
+2. find-bad-constructs'
 
 ```
 error: unable to find plugin 'find-bad-constructs'
@@ -301,6 +301,7 @@ ninja: build stopped: subcommand failed.
 
 [For the clang plugins, add `clang_use_chrome_plugins = false` to your args.gn to disable them.](https://groups.google.com/a/chromium.org/g/blink-dev/c/Ep4GJJHFNYI)
 
+或者使用 `./src/tools/clang/scripts/build.py --without-fuchsia` 编译的 llvm，而不是使用  Mac 系统的。
 
 > jdk
 
