@@ -317,6 +317,9 @@ java8 放到 `third_part/jdk/extras/java_8/` 目录下。
 
 > aapt2
 
+替换 `third_party/android_build_tools/aapt2/` 的 aapt2。
+
+
 ```
 [5984/9904] ACTION //examples:AppRTCMobile__compile_resources(//build/toolchain/android:android_clang_arm)
 FAILED: gen/examples/AppRTCMobile__compile_resources.srcjar obj/examples/AppRTCMobile.ap_ obj/examples/AppRTCMobile.ap_.info gen/examples/AppRTCMobile__compile_resources_R.txt obj/examples/AppRTCMobile/AppRTCMobile.resources.proguard.txt gen/examples/AppRTCMobile__compile_resources.resource_ids
@@ -328,6 +331,35 @@ Traceback (most recent call last):
 TypeError: 'NoneType' object is not subscriptable
 
 [5993/9904] CXX obj/p2p/rtc_p2p_unittests/basic_port_allocator_unittest.o
+```
+
+修改 `build/android/gyp/util/parallel.py`
+
+```
+-  def __init__(self, func):
++  def __init__(self, func, fork_params, **fork_kwargs):
+     global _is_child_process
+     _is_child_process = True
+     self._func = func
++    self._fork_params = fork_params
++    self._fork_kwargs = fork_kwargs
+
+   def __call__(self, index, _=None):
+     try:
+-      return self._func(*_fork_params[index], **_fork_kwargs)
++      return self._func(*self._fork_params[index], **self._fork_kwargs)
+     except Exception as e:
+       # Only keep the exception type for builtin exception types or else risk
+       # further marshalling exceptions.
+@@ -203,7 +205,7 @@ def BulkForkAndCall(func, arg_tuples, **kwargs):
+     return
+
+   pool = _MakeProcessPool(arg_tuples, **kwargs)
+-  wrapped_func = _FuncWrapper(func)
++  wrapped_func = _FuncWrapper(func, arg_tuples, **kwargs)
+   try:
+     for result in pool.imap(wrapped_func, range(len(arg_tuples))):
+       _CheckForException(result)
 ```
 
 4. Socket 连接失败
@@ -415,6 +447,25 @@ def MaybeRunCommand(name, argv, stamp_file):
   return True
 ```
 
+> mac 编译 arm64 报 ` argument unused during compilation: '--rtlib=libgcc'`
+
+```
+[8/2688] CXX obj/api/units/frequency/frequency.o
+FAILED: obj/api/units/frequency/frequency.o
+../../third_party/llvm-build/Release+Asserts/bin/clang++ -MMD -MF obj/api/units/frequency/frequency.o.d -D_GNU_SOURCE -DANDROID -DHAVE_SYS_UIO_H -DANDROID_NDK_VERSION_ROLL=r22_1 -DCR_CLANG_REVISION=\"llvmorg-13-init-7296-ga749bd76-2\" -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_DEBUG -DDYNAMIC_ANNOTATIONS_ENABLED=1 -DWEBRTC_ENABLE_PROTOBUF=1 -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE -DRTC_ENABLE_VP9 -DWEBRTC_HAVE_SCTP -DWEBRTC_ARCH_ARM64 -DWEBRTC_HAS_NEON -DWEBRTC_LIBRARY_IMPL -DWEBRTC_ENABLE_SYMBOL_EXPORT -DWEBRTC_ENABLE_AVX2 -DWEBRTC_NON_STATIC_TRACE_EVENT_HANDLERS=1 -DWEBRTC_POSIX -DWEBRTC_LINUX -DWEBRTC_ANDROID -DABSL_ALLOCATOR_NOTHROW=1 -I../.. -Igen -I../../third_party/abseil-cpp -fno-delete-null-pointer-checks -fno-ident -fno-strict-aliasing --param=ssp-buffer-size=4 -fstack-protector -funwind-tables -fPIC -fcolor-diagnostics -fmerge-all-constants -fcrash-diagnostics-dir=../../tools/clang/crashreports -mllvm -instcombine-lower-dbg-declare=0 -ffunction-sections -fno-short-enums --rtlib=libgcc --target=aarch64-linux-android21 -mno-outline -Wno-builtin-macro-redefined -D__DATE__= -D__TIME__= -D__TIMESTAMP__= -Xclang -fdebug-compilation-dir -Xclang . -no-canonical-prefixes -Wall -Werror -Wextra -Wimplicit-fallthrough -Wunreachable-code -Wthread-safety -Wextra-semi -Wno-missing-field-initializers -Wno-unused-parameter -Wno-c++11-narrowing -Wno-unneeded-internal-declaration -Wno-undefined-var-template -Wno-psabi -Wno-ignored-pragma-optimize -Wno-implicit-int-float-conversion -Wno-final-dtor-non-final-class -Wno-builtin-assume-aligned-alignment -Wno-deprecated-copy -Wno-non-c-typedef-for-linkage -Wmax-tokens -O0 -fno-omit-frame-pointer -g2 -Xclang -debug-info-kind=constructor -ggnu-pubnames -fvisibility=hidden -Wheader-hygiene -Wstring-conversion -Wtautological-overlap-compare -Wexit-time-destructors -Wglobal-constructors -Wc++11-narrowing -Wimplicit-fallthrough -Wthread-safety -Winconsistent-missing-override -Wundef -Wunused-lambda-capture -Wno-shorten-64-to-32 -Wno-undefined-bool-conversion -Wno-tautological-undefined-compare -std=c++14 -fno-trigraphs -Wno-trigraphs -fno-exceptions -fno-rtti --sysroot=../../third_party/android_ndk/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -fvisibility-inlines-hidden -Wnon-virtual-dtor -Woverloaded-virtual -c ../../api/units/frequency.cc -o obj/api/units/frequency/frequency.o
+clang++: error: argument unused during compilation: '--rtlib=libgcc' [-Werror,-Wunused-command-line-argument]
+```
+
+注释掉 `config/android/BUILD.gn` 的 `cflags += [ "--rtlib=libgcc" ]`，这是一个连接参数。
+
+```
+if (current_cpu == "arm64") {
+    # For outline atomics on AArch64 (can't pass this unconditionally
+    # due to unused flag warning on other targets).
+    # cflags += [ "--rtlib=libgcc" ]
+}
+```
+
 ## 编译 so 文件
 
 debug
@@ -430,80 +481,4 @@ ninja -C out/debug
 # 或者指定编译目标，更快编译。
 # ninja -C out/debug webrtc
 cp out/debug/obj/libwebrtc.a <dir>
-```
-
-> 链接问题
-
-无法找到 `CreatePeerConnectionFactory`
-
-```
-C/C++: ld: error: undefined symbol: webrtc::CreatePeerConnectionFactory(rtc::Thread*, rtc::Thread*, rtc::Thread*, rtc::scoped_refptr<webrtc::AudioDeviceModule>, rtc::scoped_refptr<webrtc::AudioEncoderFactory>, rtc::scoped_refptr<webrtc::AudioDecoderFactory>, std::__ndk1::unique_ptr<webrtc::VideoEncoderFactory, std::__ndk1::default_delete<webrtc::VideoEncoderFactory> >, std::__ndk1::unique_ptr<webrtc::VideoDecoderFactory, std::__ndk1::default_delete<webrtc::VideoDecoderFactory> >, rtc::scoped_refptr<webrtc::AudioMixer>, rtc::scoped_refptr<webrtc::AudioProcessing>, webrtc::AudioFrameProcessor*)
-```
-
-通过 nm 工具查看 `libwebrtc.a` 中是否包含该函数
-
-```
-$ nm --demangle out/arm64/libwebrtc.a | grep -i webrtc::CreatePeerConnectionFactory
-
-webrtc::CreatePeerConnectionFactory(rtc::Thread*, rtc::Thread*, rtc::Thread*, rtc::scoped_refptr<webrtc::AudioDeviceModule>, rtc::scoped_refptr<webrtc::AudioEncoderFactory>, rtc::scoped_refptr<webrtc::AudioDecoderFactory>, std::__1::unique_ptr<webrtc::VideoEncoderFactory, std::__1::default_delete<webrtc::VideoEncoderFactory> >, std::__1::unique_ptr<webrtc::VideoDecoderFactory, std::__1::default_delete<webrtc::VideoDecoderFactory> >, rtc::scoped_refptr<webrtc::AudioMixer>, rtc::scoped_refptr<webrtc::AudioProcessing>, webrtc::AudioFrameProcessor*)
-```
-发现确实有，不过其中的的参数是 `std::__1`，而不是 `std::__ndk1`，webrtc 从 M74 版本开始默认的编译变成了 `std::__1`。可以增加 `use_custom_libcxx=false` 参数使 webrtc 构建使用 `std::__ndk1` 命名空间。
-```
-gn gen out/arm --args='target_os="android" target_cpu="arm" use_custom_libcxx=false'
-```
-
-安卓 NDK 已将libc++的内联命名空间更改为std::__ ndk1，以防止平台libc++发生ODR问题。
-```
-https://groups.google.com/g/discuss-webrtc/c/6s1Tk99Z9Pw/m/4Gs-9VVZAgAJ
-https://chromium.googlesource.com/chromium/src/+/refs/heads/main/build/config/c++/c++.gni
-```
-
-
-> 缺少 `OpenSLES`
-
-```
-ld: error: undefined symbol: SL_IID_RECORD
->>> referenced by opensles_recorder.cc:287 (../../modules/audio_device/android/opensles_recorder.cc:287)
->>>               opensles_recorder.o:(webrtc::OpenSLESRecorder::CreateAudioRecorder()) in archive /Users/albert/project/android/AndroidTest/app/rtc_demo_native/src/main/cpp/lib/arm64-v8a/libwebrtc.a
->>> referenced by opensles_recorder.cc:287 (../../modules/audio_device/android/opensles_recorder.cc:287)
->>>               opensles_recorder.o:(webrtc::OpenSLESRecorder::CreateAudioRecorder()) in archive /Users/albert/project/android/AndroidTest/app/rtc_demo_native/src/main/cpp/lib/arm64-v8a/libwebrtc.a
-clang++: error: linker command failed with exit code 1 (use -v to see invocation)
-ninja: build stopped: subcommand failed.
-```
-
-在链接配置 `target_link_libraries` 中添加 `OpenSLES`
-
-```
-# can link multiple libraries, such as libraries you define in this
-# build script, prebuilt third-party libraries, or system libraries.
-target_link_libraries( # Specifies the target library.
-        rtc_demo
-        ${OPENGL_LIB}
-        android
-        native_app_glue
-        webrtc
-        EGL
-        GLESv3
-        OpenSLES
-        ${camera-lib}
-        ${media-lib}
-        ${log-lib})
-```
-
-> 缺少 rtc_bash 中的 json 格式化函数
-
-修改 src/BUILD.gn
-```gn
-if (!build_with_chromium) {
-  # Target to build all the WebRTC production code.
-  rtc_static_library("webrtc") {
-    ...
-    deps = [
-      ...
-      "rtc_base:rtc_json", # 添加依赖
-    ]
-    ... 
-  }
-}
-
 ```
