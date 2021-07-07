@@ -76,11 +76,26 @@ if (!build_with_chromium) {
 
 ```
 
+或者也可以打开 webrtc 的 `RTTI` 功能，在 gn 中增加参数 `use_rtti=true` 。
+
+```
+use_rtti
+    Current value (from the default) = false
+      From //build/config/compiler/BUILD.gn:74
+
+    Build with C++ RTTI enabled. Chromium builds without RTTI by default,
+    but some sanitizers are known to require it, like CFI diagnostics
+    and UBsan variants.
+```
+
+```
+gn gen out/arm64 --args='target_os="android" target_cpu="arm64" use_custom_libcxx=false  android_full_debug=true symbol_level=2 use_rtti=true'
+```
 
 > 带调试信息
 
 ```
-gn gen out/arm64 --args='target_os="android" target_cpu="arm64" use_custom_libcxx=false  android_full_debug=true symbol_level=2 strip_absolute_paths_from_debug_symbols=false'
+gn gen out/arm64 --args='target_os="android" target_cpu="arm64" use_custom_libcxx=false  android_full_debug=true symbol_level=2'
 ```
 
 >  undefined reference to `typeinfo for XXX`
