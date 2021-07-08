@@ -26,6 +26,8 @@ $ nm --demangle libwebrtc.a
 
 阅读性最好的是 `dwarfdump`，例如：
 
+dwarfdump <可执行文件/库文件>
+
 ```shell
 $ dwarfdump libwebrtc.a
 libwebrtc.a(create_peerconnection_factory.o):	file format elf64-littleaarch64
@@ -129,30 +131,71 @@ attach <pid>
 
 了解了远程调试的流程，我们来看 Android Studio 的调试，这样如果不能正确得打断点，我们就能很方便地进行诊断问题出在那里。
 
+使用 Android Studio 的 `Attach Debugger to Android process` 时会输出 Android Studio 的脚本
 
+![Android Debugger Console](images/android_debugger_console.png)
 
+此时 lldb 并不能使用，需要在 C++ 代码中打个断点，然后 lldb 的 client 就能用了。
+
+![LLDB client](images/lldb_client_window.png)
+
+查看是否加载带符号表的库。使用 lldb 的 `image list`
+
+```shell
+(lldb) image list
+...
+[325] 9C6B9195 0x00000073bf618000 /Users/albert/.lldb/module_cache/remote-android/.cache/9C6B9195/base.odex 
+[326] 7FF70FE5-49B6-1934-A565-25D0ABB0F85F-A48B0D26 0x00000073b6512000 /Users/albert/project/android/AndroidTest/app/rtc_demo_native/build/intermediates/cxx/Debug/1v3t6s3w/obj/arm64-v8a/librtc_demo.so 
+```
+
+可以看到库的位置有一个特别的地方。可以打断点的库是从项目下的库，例如这里的 `librtc_demo.so`，`/Users/albert/project/android/AndroidTest/` 就是我的项目目录，而其它库使用 `$HOME/.lldb/module_cache/remote-android/.cache` 目录下的库。可以使用 `dwarfdump` 来对比这两种路径下的文件，`.lldb/module_cache/remote-android` 目录下的文件都没有携带 debug symbol.
+
+其实 `.lldb/module_cache/remote-android/.cache` 目录下的可执行文件都是在本地找不到执行文件，从手机上（远程端）拉取下来的。而本地找得到**对应文件**的，就不会从远端拉取。
+
+debug 程序的调试原理是，本地和远端都要存储同样的执行文件，这样在调试过程中，就不用发送具体执行的代码内容，仅发送 lldb 的调试指令，如断点行数，代码行数等信息，从而减少调试过程中的数据传输。
+
+那如何让 lldb 找到我们带调试信息的库，而不是从远程获取呢？我们看一下 lldb 查找库的路径。
+
+```
+(lldb) settings show target.exec-search-paths
+target.exec-search-paths (file-list) =
+  [0]: /Users/albert/project/android/AndroidTest/app/rtc_demo_native/build/intermediates/cxx/Debug/1v3t6s3w/obj/arm64-v8a
+```
+我们只需要也添加一个这样的搜索路径即可，使用 `settings set` 或者 `setting append` 命令，区别就是 `set` 是设置，而 `append` 是添加。
+
+```
+settings append target.exec-search-paths <你的带 debug symbole 的路径>
+```
+
+这个命令必须在 lldb attach 进程之前设置，因此我们修改 Android Studio 的 配置。
+
+在 Android Studio 中 Edit Configuration -> app -> debugger 中添加
+
+![添加 debug 参数](images/android_studio_so_debug_params.png)
+
+这里设置目录和在 `LLDB Startup Commands` 下添加 `settings append` 指令是相同的效果。
+
+设置之后，如果还不能正确加载对应目录下的程序。这就涉及到另一个问题，lldb 是如何将本地可执行文件和远端关联的，显然不是文件名，因为文件名可以随时更改。lldb 使用了 `build id`.
 
 ## Build ID
 
-build id 是用于唯一标识一个编译目标，广泛应用于可执行文件，lib，可制成程序以及 debuginfo 文件等。
+build id 是用于唯一标识一个编译目标，广泛应用于可执行文件，lib，可制成程序以及 debuginfo 文件等。使用 `build id` 是为了使 elf文件 `自识别`。使用 build id 有一系列的便利之处，能够标识当前正在运行的程序，让帮助用户了解程序运行的调试工具能够与对应的包、源文件、debuginfo 进行关联（通常在发生异常时）。
 
-通常是二级制文件特定部分的校验和（hash）
+SHA-1 build id 是根据 elf 头和短内容的二级制内容生成的 160 bits/20 bytes 的字符串。这意味着它在ELF文件的一组有意义的内容中是唯一的，如果输出文件本来是相同的，则它是相同的。
 
- This allows two builds of the same program on the same host to always produce consistent build-ids and binary content.
-
-SHA-1 build id 是 160 bits/20 bytes 的字符串。
-
- There are a couple of conventions in place to use this information to identify “currently running” or “distro installed” builds. This helps with identifying what was being run and match it to the corresponding package, sources and debuginfo for tools that want to help the user show what is going on (at the moment mostly when things break). We would like to extend this to a more universial approach, that helps people identify historical, local, non- or cross-distro or organisational builds. So that Build-IDs become useful outside the current “static” setup and retain information over time and across upgrades.
-
-## Build-ID background
+当将可执行文件或共享库加载到内存中时，build id 也会加载到内存中，进程的核心转储也将具有可执行文件和共享库中嵌入的 build id。 在将 DebugInfo 从主可执行文件或共享库分离成单独的 .debug文件， `debug id` 也将被复制。 这意味着将核心文件或运行进程跟原始可执行文件和共享库匹配很容易。将这些文件与提供更多内省和调试信息的debuginfo文件进行匹配也很简单。
 
 
-The main idea behind Build-IDs is to make elf files “self-identifying”. This means that when you have a Build-ID it should uniquely identify a final executable or shared library. The default Build-ID calculation (done through ld –build-id, see the ld manual) calculates a sha1 hash (160 bits/20 bytes) based on all the ELF header bits and section contents in the file. Which means that it is unique among the set of meaningful contents for ELF files and identical when the output file would otherwise have been identical. GCC now passes –build-id to the linker by default.
+添加 build id 需要修改 `build/toolchain/gcc_toolchain.gni` 中 `tool("solink")` 的链接命令，添加参数 `-Wl,--build-id=sha1`.
+```shell
+$ vim build/toolchain/gcc_toolchain.gni
 
-When an executable or shared library is loaded into memory the Build-ID will also be loaded into memory, a core dump of a process will also have the Build-IDs of the executable and the shared libraries embedded. And when separating debuginfo from the main executable or shared library into .debug files the original Build-ID will also be copied over. This means it is easy to match a core file or a running process to the original executable and shared library builds. And that matching those against the debuginfo files that provide more information for introspection and debugging should be trivial.
-
-
-
+...
+# link_command = "$ld -shared -Wl,-soname=\"$soname\" {{ldflags}}${extra_ldflags} -o \"$unstripped_sofile\" @\"$rspfile\""
+# 修改为
+link_command = "$ld -shared -Wl,--build-id=sha1 -Wl,-soname=\"$soname\" {{ldflags}}${extra_ldflags} -o \"$unstripped_sofile\" @\"$rspfile\""
+...
+```
 
 查看是否有 `build id` 可以使用 `readelf` 指令 
 
@@ -176,11 +219,6 @@ ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, w
 $ file libwebrtc.a
 ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, BuildID[sha1]=fa8ffd39fcb7c0443af3667c2175de2af633721e, with debug_info, not stripped
 ```
-
-![lldb 为什么需要 build id](images/build_id.png)
-https://github.com/android/ndk/issues/885
-
-http://abcdxyzk.github.io/blog/2014/09/12/compiler-build-id/
 
 
 ```shell
@@ -208,16 +246,16 @@ Index   UserID DSX Type            File Address/Value Load Address       Size   
 
 > 查看某个函数或者类信息 lookup
 
-```
-image lookup -vn <SomeFunctionNameThatShouldHaveDebugInfo>
+```shell
+(lldb) image lookup -vn <SomeFunctionNameThatShouldHaveDebugInfo>
 ```
 
 函数或者类名不一定写全限定，例如 `truman::TrumanEngine::SetAndroidObjects` 可以写成 `SetAndroidObjects`
 
 ```s
-lldb> f
+(lldb) f
 frame #0: 0xb400caac libengine.so`truman::TrumanEngine::SetAndroidObjects(javaVM=0x00000000) at truman_engine_impl.cc:206:5
-lldb> image lookup -vn SetAndroidObjects
+(lldb) image lookup -vn SetAndroidObjects
 1 match found in /Users/albert/project/android/work/webrtc_branch/module/video/libs/armeabi-v7a/libengine.so:
         Address: libengine.so[0x001c4a94] (libengine.so.PT_LOAD[0]..text + 137812)
         Summary: libengine.so`truman::TrumanEngine::SetAndroidObjects(void*) at truman_engine_impl.cc:201
@@ -231,8 +269,30 @@ lldb> image lookup -vn SetAndroidObjects
        Variable: id = {0x7fffffff000dfb2c}, name = "javaVM", type = "void *", location = DW_OP_fbreg +4, decl = truman_engine_impl.cc:201
 ```
 
+## 添加路径映射
+
+能够查看到特定的程序之后，如果 so 是有别人提供的，或者特殊编译机编译好的。这时候可能跟本地的源码路径对不上。我们需要使用设置路径映射：
+
+```shell
+settings set target.source-map <编译时的源码目录> <映射到的源码目录>
+```
+如:
+
+```shell
+(lldb) settings set target.source-map /opt/webrtc/src/out/Debug /Users/albert/project/android/AndroidTest/app/rtc_demo_native/lib/arm64-v8a
+```
+
+为了不每次设置，我们可以将上面的命令添加到 Android Studio 的运行配置中。
+
+![LLDB config](images/android_studio_lldb_command.png)
+
+
+重新 `Attach Debugger`， 终于可以调试啦，继续努力！！！
 
 > 参考文档
-
+![lldb 为什么需要 build id](images/build_id.png)
+https://github.com/android/ndk/issues/885
 [build id](http://abcdxyzk.github.io/blog/2014/09/12/compiler-build-id/)
 [Remot debug](https://www.cnblogs.com/ciml/p/14154668.html)
+[gdb 指定搜索路径或者或者目录映射](https://www.cnblogs.com/eric-geoffrey/p/3365653.html)
+[gdb redirect path offical doc](https://sourceware.org/gdb/current/onlinedocs/gdb/Source-Path.html)
