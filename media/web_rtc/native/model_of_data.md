@@ -9,7 +9,7 @@ Source --> Track --> Sink
 
 - 多个媒体对应多个 Track, 例如音频和视频各都应一个 Track。
 
-            
+
 Source 作为数据源，可以有摄像头、麦克风、文件、屏幕采集、远端接收等。以 P2P 通话为例，一个 Souce 用于屏幕采集用于发送，发送方发送的一个 track，在接收端也一定表现为一个 track。
 
 一个 Souce 接收数据。给 track 加 sink 实际上都是给 track 的 source 加 sink。

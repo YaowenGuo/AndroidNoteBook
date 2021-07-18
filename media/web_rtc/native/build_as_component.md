@@ -70,7 +70,7 @@ if (!build_with_chromium) {
       ...
       "rtc_base:rtc_json", # 添加依赖
     ]
-    ... 
+    ...
   }
 }
 
@@ -107,7 +107,7 @@ CMakeFiles/rtc_demo.dir/peer/android_video_frame_buffer.cpp.o:(.data.rel.ro._ZTI
 
 这是由于 webrtc 部分组件使用 `-fno-rtti` 禁用了 rtti，我们无法使用这些运行时信息，为了避免错误，添加编译参数。
 
-```
+
 ```
 android {
     defaultConfig {
@@ -119,4 +119,20 @@ android {
     }
     ...
 }
+```
+
+
+> [C++ 17 中 std::string_view 赋值给 absl::string_view 错误](https://github.com/envoyproxy/envoy/issues/12341)
+
+
+```C++
+undefined reference to `rtc::PlatformThread::PlatformThread(void (*)(void*), void*, std::__ndk1::basic_string_view<char, std::__ndk1::char_traits<char> >, rtc::ThreadAttributes)
+```
+
+配置不生效，应该是 Webrtc 还没有给出配置接口，将自己项目中的 C++ 版本由 17 降为 14 就好了。
+
+## 最终
+
+```
+gn gen out/arm64 --args='target_os="android" target_cpu="arm64" use_custom_libcxx=false  android_full_debug=true symbol_level=2 use_rtti=true'
 ```
